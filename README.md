@@ -1,8 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Next-Admin
+
+Next-Admin is a Next.js frontend application inspired by tools like Rails Admin. It provides an intuitive interface for managing Devise-based users in Rails applications. With plans to expand its functionality, Next-Admin aims to become a comprehensive CRUD and admin panel solution for Rails-powered backends.
+
+## Features
+
+### User Management
+
+Manage Devise users seamlessly with a modern, user-friendly interface:
+* List all users
+* Add new users
+* Edit existing users
+* Delete users
+
+### Future Enhancements
+
+* **Custom User Management**: Support for non-Devise users and custom user models (currently under development).
+* **CRUD Functionality**: Full Rails Admin-like CRUD support for managing data directly from the frontend.
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+Ensure you have the following installed on your system:
+* Node.js (16.x or later recommended)
+* npm, yarn, pnpm, or bun for package management.
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/your-repo/next-admin.git
+   cd next-admin
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   yarn install
+   # or
+   pnpm install
+   # or
+   bun install
+   ```
+
+### Running the Development Server
+
+Start the development server with the following command:
 
 ```bash
 npm run dev
@@ -14,23 +58,59 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Once started, open http://localhost:3000 in your browser to see the app in action.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### File Structure
+* `app/`: Contains the main Next.js application files.
+* `context/`: Context files for managing application state (e.g., server context).
+* `components/`: Reusable UI components.
+* `utils/`: Utility functions for APIs and IndexedDB interactions.
+
+### Key Functionalities
+
+#### User Management
+* **Devise Users**: All CRUD operations for Devise-managed user types.
+* **API Integration**: Works seamlessly with a Rails backend using APIs like `/user_types` and dynamic CRUD routes.
+
+#### CRUD for Rails Models (Planned)
+* A Rails Admin-like interface for managing all models dynamically from the Next.js frontend.
+* Dynamic form generation and table views for Rails models.
+
+### Environment Variables
+
+Ensure the following environment variables are configured:
+* `NEXT_PUBLIC_BASE_URL`: The base URL of your Rails API.
+
+You can set these variables in a `.env.local` file:
+
+```env
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+```
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+To learn more about the frameworks and tools used in this project, check out the following resources:
+* Next.js Documentation
+* Devise Gem Documentation
+* Rails Admin
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deployment
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Deploy your app on Vercel for seamless hosting and integration with Next.js.
+Refer to the Next.js Deployment Documentation for additional details.
 
-## Deploy on Vercel
+## Contributing
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+We welcome contributions to improve Next-Admin. Whether it's fixing bugs, improving documentation, or adding new features, your input is valuable!
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit your changes: `git commit -m 'Add feature-name'`
+4. Push to your branch: `git push origin feature-name`
+5. Open a pull request
+
+## License
+
+This project is licensed under the MIT License.
