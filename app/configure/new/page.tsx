@@ -112,7 +112,7 @@ export default function NewServerPage() {
     
         // Navigate to /configure after success
         // router.push("/configure");
-        router.push(`/dashboard/${data.apiName}`) // Navigate to the new route
+        router.push(`/${data.apiName}/dashboard`) // Navigate to the new route
       } catch (fetchError) {
         setErrors({ apiKey: "Failed to fetch user types. Please try again." });
         console.error("Error fetching user types:", fetchError);

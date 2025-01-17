@@ -34,7 +34,7 @@ export default function RandomImageWithQuote() {
           <h1 className="text-2xl font-bold">Devise CRUD</h1>
           <p className="text-sm italic">Seamless UI for Rails Devise</p>
           <a
-            href="https://github.com/kpvarma/devise_crud/"
+            href="https://github.com/kpvarma/crudify/"
             target="_blank"
             rel="noopener noreferrer"
             className="text-blue-300 underline hover:text-blue-500 mt-2 inline-block"

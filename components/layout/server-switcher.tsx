@@ -30,7 +30,7 @@ export function ServerSwitcher() {
 
   const handleServerSelect = (server: typeof servers[0]) => {
     setActiveServer(server) // Update the active server in context
-    router.push(`/dashboard/${server.apiName}`) // Navigate to the new route
+    router.push(`/${server.apiName}/dashboard`) // Navigate to the new route
   }
 
   return (

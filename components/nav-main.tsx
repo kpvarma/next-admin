@@ -50,14 +50,14 @@ export function NavMain() {
                 <SidebarMenuSub>
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton asChild>
-                      <a href={`/dashboard/${activeServer.apiName}/${userType.model}`}>
+                      <a href={`/${activeServer.apiName}/${userType.model}`}>
                         <span>List {userType.name}</span>
                       </a>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
                   <SidebarMenuSubItem>
                     <SidebarMenuSubButton asChild>
-                    <a href={`/dashboard/${activeServer.apiName}/${userType.model}/new`}>
+                    <a href={`/${activeServer.apiName}/${userType.model}/new`}>
                       <span>Add New {userType.name}</span>
                     </a>
                     </SidebarMenuSubButton>

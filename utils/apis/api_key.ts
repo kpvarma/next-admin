@@ -9,7 +9,7 @@ export async function validateAPIUrl(url: string): Promise<{ valid: boolean; err
   }
 
   try {
-    const response = await fetch(`${url}/devise_crud/api/v1/health`, { method: "GET" });
+    const response = await fetch(`${url}/crudify/api/v1/health`, { method: "GET" });
     if (!response.ok) {
       return { valid: false, error: "This URL does not seem to be a valid API endpoint for a Rails application with Devise configured." };
     }
@@ -28,7 +28,7 @@ export async function validateAPIKey(url: string, key: string): Promise<{ valid:
   }
 
   try {
-    const response = await fetch(`${url}/devise_crud/api/v1/validate_api_key`, {
+    const response = await fetch(`${url}/crudify/api/v1/validate_api_key`, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}` },
     });

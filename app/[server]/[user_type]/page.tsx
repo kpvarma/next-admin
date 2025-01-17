@@ -2,8 +2,9 @@
 
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
-import MainLayout from "../../../../components/layout/main-layout";
-import { useServer } from "../../../../context/server_context"; // Adjust path as needed
+import MainLayout from "@/components/layout/main-layout";
+import { useServer } from "@/context/server_context";
+import { fetchByApiName } from "@/utils/indexdb";
 
 import {
   Table,
@@ -16,19 +17,27 @@ import {
 } from "@/components/ui/table";
 
 export default function UserTypeList() {
-  const { server, user_type } = useParams();
+  const { server_name, user_type } = useParams();
   const { activeServer, setActiveServer, servers } = useServer(); // Access server context
 
   useEffect(() => {
-    // Find the server object from the servers list using the server param
-    const matchedServer = servers.find((s: any) => s.apiName === server);
-
-    if (matchedServer) {
-      setActiveServer(matchedServer); // Set the active server in context
-    } else {
-      console.warn(`Server "${server}" not found in context.`);
+    const resolvedServerName = Array.isArray(server_name) ? server_name[0] : server_name || "no-server-name"; // Use the first item if it's an array
+    if (server_name && server_name != "no-server-name") {
+      const fetchAndSetActiveServer = async () => {
+        const matchedServer = await fetchByApiName(resolvedServerName);
+  
+        if (matchedServer) {
+          setActiveServer(matchedServer); // Set the active server in context
+        } else {
+          console.warn(`Server "${server_name}" not found in context.`);
+        }
+      };
+  
+      fetchAndSetActiveServer();
     }
-  }, [server, servers, setActiveServer]);
+  }, [server_name, setActiveServer]);
+
+  
 
   // Sample user data
   const userData = [
@@ -41,7 +50,7 @@ export default function UserTypeList() {
     <MainLayout>
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">
-          {user_type} List (Server: {server})
+          {user_type} List (Server: {server_name})
         </h1>
         <Table>
           <TableCaption>A list of {user_type} users.</TableCaption>

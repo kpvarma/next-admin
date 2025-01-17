@@ -66,7 +66,7 @@ export default function ListServers() {
 
   const handleLaunch = (server: any) => {
     console.log("Launch server:", server);
-    router.push(`/dashboard/${server.apiName}`); // Navigate to the dashboard page
+    router.push(`/${server.apiName}/dashboard`); // Navigate to the dashboard page
   };
 
   return (
