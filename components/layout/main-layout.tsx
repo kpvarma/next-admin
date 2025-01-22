@@ -31,12 +31,12 @@ export default function MainLayout({ children }: { children: React.ReactNode;}) 
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
                   <BreadcrumbLink href="#">
-                    Devise CRUD
+                    Crudify CRUD
                   </BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
-                  <BreadcrumbPage>{activeServer?.apiName}</BreadcrumbPage>
+                  <BreadcrumbPage>{activeServer?.name}</BreadcrumbPage>
                 </BreadcrumbItem>
               </BreadcrumbList>
             </Breadcrumb>

@@ -31,8 +31,8 @@ export default function RandomImageWithQuote() {
 
         {/* Logo Section */}
         <div className="text-right">
-          <h1 className="text-2xl font-bold">Devise CRUD</h1>
-          <p className="text-sm italic">Seamless UI for Rails Devise</p>
+          <h1 className="text-2xl font-bold">Next.js with CRUDify</h1>
+          <p className="text-sm italic">Seamless CRUD UI for Rails Models using CRUDify</p>
           <a
             href="https://github.com/kpvarma/crudify/"
             target="_blank"

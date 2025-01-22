@@ -11,32 +11,37 @@ import { Input } from "@/components/ui/input";
 // Page Component Imports
 import RandomImageWithQuote from "@/components/general/random-quotes";
 
+// Context Imports
+import { CRUDifyServer } from "@/utils/models/definitions";
+import { useServer } from "../../../context/server_context";
+
 // Utils Import
-import { saveToIndexedDB, fetchAllFromIndexedDB } from "@/utils/indexdb";
 import { validateAPIUrl, validateAPIKey } from "@/utils/apis/api_key";
-import { fetchUserTypes } from "@/utils/apis/user_types";
+import { fetchModelsMetaData } from "@/utils/apis/models_metadata";
+import {
+  saveToIndexedDB,
+  fetchAllFromIndexedDB,
+  clearIndexedDB,
+} from "@/utils/indexdb";
 
 export default function NewServerPage() {
+  const { activeServer, setActiveServer, servers, setServers } = useServer(); // Access server context
+  
   const [apiName, setApiName] = useState("");
-  const [apiUrl, setApiUrl] = useState("");
+  const [apiURL, setApiURL] = useState("");
   const [apiKey, setApiKey] = useState("");
-  const [errors, setErrors] = useState<{ apiName?: string; apiUrl?: string; apiKey?: string }>({});
+  const [errors, setErrors] = useState<{ apiName?: string; apiURL?: string; apiKey?: string }>({});
 
   const [step1Complete, setStep1Complete] = useState(false);
   const [step2Complete, setStep2Complete] = useState(false);
   const [step3Complete, setStep3Complete] = useState(false);
 
   const [activeAccordion, setActiveAccordion] = useState("step1");
-  const [hasServers, setHasServers] = useState(false);
-
+  
   const router = useRouter();
 
   useEffect(() => {
-    const checkServers = async () => {
-      const servers = await fetchAllFromIndexedDB();
-      setHasServers(servers.length > 0);
-    };
-    checkServers();
+    
   }, []);
 
   const handleApiNameChange = (input: string) => {
@@ -68,14 +73,14 @@ export default function NewServerPage() {
 
   const handleStep2Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { valid, error } = await validateAPIUrl(apiUrl);
+    const { valid, error } = await validateAPIUrl(apiURL);
 
     if (!valid) {
-      setErrors({ apiUrl: error });
+      setErrors({ apiURL: error });
       setStep2Complete(false);
       setActiveAccordion("step2");
     } else {
-      setErrors((prev) => ({ ...prev, apiUrl: undefined }));
+      setErrors((prev) => ({ ...prev, apiURL: undefined }));
       setStep2Complete(true);
       setActiveAccordion("step3");
     }
@@ -83,39 +88,55 @@ export default function NewServerPage() {
 
   const handleStep3Submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const { valid, error } = await validateAPIKey(apiUrl, apiKey);
+    const { valid, error } = await validateAPIKey(apiURL, apiKey);
 
     if (!valid) {
       setErrors({ apiKey: error });
       setStep3Complete(false);
       setActiveAccordion("step3");
     } else {
-      const data = { apiName, apiUrl, apiKey, user_types: [] };
-      await saveToIndexedDB(data);
       
       try {
+        const newServer: CRUDifyServer = {
+          name: apiName,
+          apiURL: apiURL,
+          apiKey: apiKey,
+          modelMetaData: []
+        };
+
         // Fetch user types from the API
-        const { data: userTypes, error: userTypesError } = await fetchUserTypes(apiUrl, apiKey);
+        const { data: modelMetaData, error: modelMetaDataError } = await fetchModelsMetaData(newServer);
     
-        if (userTypesError) {
-          setErrors({ apiKey: userTypesError });
+        if (modelMetaDataError) {
+          setErrors({ apiKey: modelMetaDataError });
           setStep3Complete(false);
           setActiveAccordion("step3");
           return;
         }
-    
-        // Save server details and user types to IndexedDB
-        await saveToIndexedDB({ apiName, apiUrl, apiKey, user_types: userTypes });
-    
+        
+        // Save modelMetaData on new Server
+        newServer.modelMetaData = modelMetaData;
+        
+        // Save server details and user types to server context
+        setServers([...servers, newServer]);
+        
+        // Set new Server as active Server
+        setActiveServer(newServer);
+
+        // Save new server to indexDB
+        const existingServers = await fetchAllFromIndexedDB();
+        const updatedServers = [...existingServers, newServer];
+        await saveToIndexedDB(updatedServers);
+
         setErrors({});
         setStep3Complete(true);
     
         // Navigate to /configure after success
         // router.push("/configure");
-        router.push(`/${data.apiName}/dashboard`) // Navigate to the new route
+        router.push(`/${apiName}/dashboard`) // Navigate to the new route
       } catch (fetchError) {
-        setErrors({ apiKey: "Failed to fetch user types. Please try again." });
-        console.error("Error fetching user types:", fetchError);
+        setErrors({ apiKey: "Failed to fetch and save server details. Please try again." });
+        console.error("Error!", fetchError);
       }
     }
   };
@@ -175,7 +196,7 @@ export default function NewServerPage() {
           <AccordionItem value="step2" disabled={!step1Complete}>
             <AccordionTrigger
               className={`flex items-center text-lg justify-start ${
-                step1Complete && step2Complete ? "text-green-500" : errors.apiUrl ? "text-red-500" : "text-gray-500"
+                step1Complete && step2Complete ? "text-green-500" : errors.apiURL ? "text-red-500" : "text-gray-500"
               }`}
             >
               <div className="mr-2 flex items-center justify-center w-4 h-4">
@@ -193,22 +214,23 @@ export default function NewServerPage() {
                     />
                   </svg>
                 ) : (
-                  <div className={`w-4 h-4 rounded-full ${errors.apiUrl ? "bg-red-500" : "bg-gray-400"}`} />
+                  <div className={`w-4 h-4 rounded-full ${errors.apiURL ? "bg-red-500" : "bg-gray-400"}`} />
                 )}
               </div>
               Step 2: Add API URL
             </AccordionTrigger>
             <AccordionContent>
               <form className="flex flex-col gap-4 mt-4" onSubmit={handleStep2Submit}>
+                <label>http://localhost:9001/</label>
                 <Input
                   id="api-url"
                   type="url"
                   placeholder="API URL (e.g., https://api.example.com)"
-                  value={apiUrl}
-                  onChange={(e) => setApiUrl(e.target.value)}
+                  value={apiURL}
+                  onChange={(e) => setApiURL(e.target.value)}
                   required
                 />
-                {errors.apiUrl && <p className="text-red-500 text-sm">{errors.apiUrl}</p>}
+                {errors.apiURL && <p className="text-red-500 text-sm">{errors.apiURL}</p>}
                 <Button type="submit" className="mt-4 w-full">
                   Continue
                 </Button>
@@ -249,6 +271,7 @@ export default function NewServerPage() {
             </AccordionTrigger>
             <AccordionContent>
               <form className="flex flex-col gap-4 mt-4" onSubmit={handleStep3Submit}>
+                <label>DEVISE-CRUD-KEY-0000000000000000</label>
                 <Input
                   id="api-key"
                   type="password"
@@ -265,7 +288,7 @@ export default function NewServerPage() {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-        {hasServers && (
+        {servers.length > 0 && (
           <Button
             variant="outline"
             className="mt-4"

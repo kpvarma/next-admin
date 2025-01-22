@@ -29,44 +29,36 @@ import { Plus, Trash } from "lucide-react";
 import RandomImageWithQuote from "@/components/general/random-quotes";
 
 // Utils Import
-import { fetchAllFromIndexedDB, deleteFromIndexedDB } from "@/utils/indexdb";
+import { fetchAllFromIndexedDB, deleteByApiName } from "@/utils/indexdb";
+import { useServer } from "../../context/server_context";
 
 export default function ListServers() {
-  const [servers, setServers] = useState<any[]>([]);
-  const [selectedServer, setSelectedServer] = useState<any | null>(null);
+  const { activeServer, setActiveServer, servers, setServers } = useServer(); // Access server context
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchServers = async () => {
-      const data = await fetchAllFromIndexedDB();
-      setServers(data);
-    };
-    fetchServers();
-  }, []);
-
-  const handleDelete = async (apiName: string) => {
+  const handleDelete = async (name: string) => {
     try {
       // Remove the server from IndexedDB
-      await deleteFromIndexedDB(apiName);
+      await deleteByApiName(name);
 
-      // Update the local state to reflect the deletion
-      const updatedServers = servers.filter((server) => server.apiName !== apiName);
-      setServers(updatedServers);
+      // Update the local server context to reflect the deletion
+      const servers = await fetchAllFromIndexedDB();
+      setServers(servers);
 
       // Clear the selected server if it matches the deleted one
-      if (selectedServer?.apiName === apiName) {
-        setSelectedServer(null);
+      if (servers.length > 0) {
+        setActiveServer(servers[0])
       }
 
-      console.log(`Server with apiName "${apiName}" has been deleted.`);
+      console.log(`Server with name "${name}" has been deleted.`);
     } catch (error) {
-      console.error(`Failed to delete server with apiName "${apiName}":`, error);
+      console.error(`Failed to delete server with name "${name}":`, error);
     }
   };
 
   const handleLaunch = (server: any) => {
     console.log("Launch server:", server);
-    router.push(`/${server.apiName}/dashboard`); // Navigate to the dashboard page
+    router.push(`/${server.name}/dashboard`); // Navigate to the dashboard page
   };
 
   return (
@@ -116,12 +108,12 @@ export default function ListServers() {
               <TableBody>
                 {servers.map((server) => (
                   <TableRow
-                    key={server.apiName}
+                    key={server.name}
                     className="cursor-pointer"
-                    onClick={() => setSelectedServer(server)}
+                    onClick={() => setActiveServer(server)}
                   >
-                    <TableCell className="font-medium">{server.apiName}</TableCell>
-                    <TableCell>{server.apiUrl}</TableCell>
+                    <TableCell className="font-medium">{server.name}</TableCell>
+                    <TableCell>{server.apiURL}</TableCell>
                     <TableCell className="text-right">
                       <Button
                         variant="outline"
@@ -148,7 +140,7 @@ export default function ListServers() {
                           <div className="flex justify-end gap-2 mt-4">
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
                             <AlertDialogAction
-                              onClick={() => handleDelete(server.apiName)}
+                              onClick={() => handleDelete(server.name)}
                             >
                               Delete
                             </AlertDialogAction>
@@ -166,24 +158,24 @@ export default function ListServers() {
 
       {/* Detail Section */}
       <div className="flex items-center justify-center bg-muted relative p-8">
-        {selectedServer ? (
+        {activeServer ? (
           <div className="text-left p-4 bg-white rounded-md shadow-md w-full max-w-md">
             <h2 className="text-xl font-bold mb-4">Server Details</h2>
             <p>
-              <strong>Name:</strong> {selectedServer.apiName}
+              <strong>Name:</strong> {activeServer.name}
             </p>
             <p>
-              <strong>URL:</strong> {selectedServer.apiUrl}
+              <strong>URL:</strong> {activeServer.apiUrl}
             </p>
             <p>
-              <strong>API Key:</strong> {selectedServer.apiKey}
+              <strong>API Key:</strong> {activeServer.apiKey}
             </p>
             <h3 className="text-lg font-bold mt-4">JSON Data:</h3>
 
             {/* JSON Display Card */}
-            {selectedServer && (
+            {activeServer && (
               <pre className="text-sm text-gray-800 whitespace-pre-wrap">
-                {JSON.stringify(selectedServer, null, 2)}
+                {JSON.stringify(activeServer, null, 2)}
               </pre>
             )}
             

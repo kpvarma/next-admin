@@ -72,7 +72,7 @@ Once started, open http://localhost:3000 in your browser to see the app in actio
 
 #### User Management
 * **Devise Users**: All CRUD operations for Devise-managed user types.
-* **API Integration**: Works seamlessly with a Rails backend using APIs like `/user_types` and dynamic CRUD routes.
+* **API Integration**: Works seamlessly with a Rails backend using APIs like `/model_names` and dynamic CRUD routes.
 
 #### CRUD for Rails Models (Planned)
 * A Rails Admin-like interface for managing all models dynamically from the Next.js frontend.
@@ -93,7 +93,7 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 
 To learn more about the frameworks and tools used in this project, check out the following resources:
 * Next.js Documentation
-* Devise Gem Documentation
+* CRUDify Gem Documentation
 * Rails Admin
 
 ## Deployment

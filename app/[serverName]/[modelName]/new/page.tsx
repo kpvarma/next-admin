@@ -3,8 +3,10 @@
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
-export default function AddUserType() {
-  const { server, user_type } = useParams();
+export default function AddModel() {
+  const { serverName, modelName: rawModelName } = useParams();
+  const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
+  
   const [formData, setFormData] = useState({ name: "", email: "" });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -15,13 +17,13 @@ export default function AddUserType() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Submitted Data:", formData);
-    alert(`Added ${user_type}: ${formData.name}`);
+    alert(`Added ${modelName}: ${formData.name}`);
   };
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">
-        Add New {user_type} (Server: {server})
+        Add New {modelName} (Server: {serverName})
       </h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -52,7 +54,7 @@ export default function AddUserType() {
           type="submit"
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Add {user_type}
+          Add {modelName}
         </button>
       </form>
     </div>

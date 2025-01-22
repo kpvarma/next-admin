@@ -20,54 +20,72 @@ import {
 } from "@/components/ui/sidebar";
 
 import { useServer } from "@/context/server_context"; // Import serverContext
+import { ModelMetaData } from "@/utils/models/definitions"; // Import serverContext
 
 export function NavMain() {
-  const { activeServer, servers } = useServer(); // Use serverContext
+  const { activeServer, setActiveServer, servers, setServers } = useServer(); // Access server context
 
-  // Get the user_types from the active server
-  const userTypes = activeServer?.user_types || [];
+  // Get the model_names from the active server
+  const modelMetaData = activeServer?.modelMetaData || [];
+
+  // Group models by their `menu.parent`
+  const groupedData = modelMetaData.reduce((acc, model) => {
+    const parent = model.menu.parent || "Uncategorized"; // Default to "Uncategorized" if parent is missing
+    if (!acc[parent]) {
+      acc[parent] = [];
+    }
+    acc[parent].push(model);
+    return acc;
+  }, {} as Record<string, ModelMetaData[]>);
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Users</SidebarGroupLabel>
-      <SidebarMenu>
-        {userTypes.map((userType) => (
-          <Collapsible
-            key={userType.name}
-            asChild
-            defaultOpen={false} // By default, collapsible is closed
-            className="group/collapsible"
-          >
-            <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={userType.name}>
-                  {/* Optional: Add an icon dynamically */}
-                  <span>{userType.name}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton asChild>
-                      <a href={`/${activeServer.apiName}/${userType.model}`}>
-                        <span>List {userType.name}</span>
-                      </a>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton asChild>
-                    <a href={`/${activeServer.apiName}/${userType.model}/new`}>
-                      <span>Add New {userType.name}</span>
-                    </a>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                </SidebarMenuSub>
-              </CollapsibleContent>
-            </SidebarMenuItem>
-          </Collapsible>
-        ))}
-      </SidebarMenu>
+      
+      {Object.keys(groupedData).map((parent) => (
+        <div key={parent} className="sidebar-group">
+          <SidebarGroupLabel className="mt-4">{parent}</SidebarGroupLabel>
+          <SidebarMenu>
+            {groupedData[parent].map((modelData) => (
+              <Collapsible
+                key={modelData.menu.label}
+                asChild
+                defaultOpen={false}
+                className="group/collapsible"
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={`${modelData.title} - ${modelData.description}`}>
+                      <span>{modelData.menu.label}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild>
+                          <a href={`/${activeServer?.name}/${modelData.name}/summary`}>
+                            <span>Summary</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton asChild>
+                          <a href={`/${activeServer?.name}/${modelData.name}`}>
+                            <span>List {modelData.name}</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                        <SidebarMenuSubButton asChild>
+                          <a href={`/${activeServer?.name}/${modelData.name}/new`}>
+                            <span>Create New {modelData.name}</span>
+                          </a>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            ))}
+          </SidebarMenu>
+        </div>
+      ))}
     </SidebarGroup>
   );
 }

@@ -1,34 +1,34 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { fetchAllFromIndexedDB } from "@/utils/indexdb"; // Adjust the path as needed
+import { CRUDifyServer } from "@/utils/models/definitions";
+import { fetchAllFromIndexedDB } from "@/utils/indexdb"; // Import the IndexedDB fetch utility
 
 // Create the context
-const ServerContext = createContext<any>(null);
+const ServerContext = createContext<{
+  servers: CRUDifyServer[];
+  setServers: React.Dispatch<React.SetStateAction<CRUDifyServer[]>>;
+  activeServer: CRUDifyServer | null;
+  setActiveServer: React.Dispatch<React.SetStateAction<CRUDifyServer | null>>;
+} | null>(null);
 
 // Provider Component
 export const ServerProvider = ({ children }: { children: React.ReactNode }) => {
-  const [servers, setServers] = useState<any[]>([]);
-  const [activeServer, setActiveServer] = useState<string | null>(null);
+  const [servers, setServers] = useState<CRUDifyServer[]>([]); // Array of servers
+  const [activeServer, setActiveServer] = useState<CRUDifyServer | null>(null); // Active server
 
-  // Fetch servers from IndexedDB
   useEffect(() => {
-    const fetchServers = async () => {
-      try {
-        const servers_data = await fetchAllFromIndexedDB();
-        setServers(servers_data);
-
-        // Set the first server as the default if activeServer is not set
-        if (servers_data.length > 0 && !activeServer) {
-          setActiveServer(servers_data[0].apiName);
-        }
-      } catch (error) {
-        console.error("Error fetching servers:", error);
+    // Load servers from IndexedDB on component mount
+    const loadServers = async () => {
+      const storedServers = await fetchAllFromIndexedDB(); // Fetch servers from IndexedDB
+      if (storedServers && storedServers.length > 0) {
+        setServers(storedServers);
+        setActiveServer(storedServers[0]); // Optionally set the first server as active
       }
     };
 
-    fetchServers();
-  }, [activeServer]);
+    loadServers();
+  }, []); // Empty dependency array ensures this runs only once
 
   return (
     <ServerContext.Provider value={{ servers, setServers, activeServer, setActiveServer }}>
@@ -38,4 +38,10 @@ export const ServerProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 // Custom Hook for consuming context
-export const useServer = () => useContext(ServerContext);
+export const useServer = () => {
+  const context = useContext(ServerContext);
+  if (!context) {
+    throw new Error("useServer must be used within a ServerProvider");
+  }
+  return context;
+};

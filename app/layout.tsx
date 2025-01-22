@@ -4,8 +4,8 @@ import { ThemeProvider } from "../components/theme-provider"; // Adjust the path
 import { ServerProvider } from "../context/server_context"; // Adjust the path as necessary
 
 export const metadata = { 
-  title: "Devise CRUD", 
-  description: "A dynamic CRUD gem for Devise-managed models in Rails." 
+  title: "Next.js with Crudify", 
+  description: "RailsAdmin like interface built with next.js and CRUDify" 
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

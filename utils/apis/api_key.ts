@@ -11,7 +11,7 @@ export async function validateAPIUrl(url: string): Promise<{ valid: boolean; err
   try {
     const response = await fetch(`${url}/crudify/api/v1/health`, { method: "GET" });
     if (!response.ok) {
-      return { valid: false, error: "This URL does not seem to be a valid API endpoint for a Rails application with Devise configured." };
+      return { valid: false, error: "This URL does not seem to be a valid API endpoint for a Rails application with CRUDify configured." };
     }
     return { valid: true, error: "" };
   } catch {

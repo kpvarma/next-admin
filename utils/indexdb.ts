@@ -1,43 +1,66 @@
 import { openDB } from "idb";
+import { CRUDifyServer } from "@/utils/models/definitions";
 
 // Open the IndexedDB database
 export async function openDatabase() {
-  return openDB("api-config", 1, {
+  await indexedDB.deleteDatabase("api-config");
+  return openDB("crudify-config", 1, {
     upgrade(db) {
       if (!db.objectStoreNames.contains("config")) {
-        db.createObjectStore("config", { keyPath: "apiName" });
+        db.createObjectStore("config", { keyPath: "name" });
       }
     },
   });
 }
 
-// Save data to IndexedDB
-export async function saveToIndexedDB(data: Record<string, any>) {
+// Save an array of servers to IndexedDB
+export async function saveToIndexedDB(servers: CRUDifyServer[]) {
   const db = await openDatabase();
-  await db.put("config", data);
-  // return await db.get("config", data.apiName);
+  const tx = db.transaction("config", "readwrite");
+  const store = tx.objectStore("config");
+
+  // Clear the existing data before saving new servers
+  await store.clear();
+
+  // Save each server in the array
+  for (const [index, server] of servers.entries()) {
+    if (!server.name) {
+      console.error(`Server at index ${index} is missing 'name':`, server);
+      throw new Error(`Server at index ${index} is missing a 'name' property.`);
+    }
+    if (typeof server.name !== "string") {
+      throw new Error(`Invalid 'name' type: ${typeof server.name}. Expected string.`);
+    }
+    await store.put(server); // Save only valid servers
+  }
+
+  await tx.done;
 }
 
-// Fetch all data from IndexedDB
-export async function fetchAllFromIndexedDB() {
+// Retrieve the array of servers from IndexedDB
+export async function fetchAllFromIndexedDB(): Promise<CRUDifyServer[]> {
   const db = await openDatabase();
   return await db.getAll("config");
 }
 
-// Fetch a specific record by `apiName`
-export async function fetchByApiName(apiName: string) {
-  const db = await openDatabase();
-  return await db.get("config", apiName);
+// Fetch a server by `name`
+export async function fetchByApiName(name: string): Promise<CRUDifyServer | undefined> {
+  const servers = await fetchAllFromIndexedDB();
+  return servers.find((server) => server.name === name);
 }
 
-// Delete a specific record by `apiName`
-export async function deleteFromIndexedDB(apiName: string) {
+// Delete a server by `name`
+export async function deleteByApiName(name: string): Promise<void> {
   const db = await openDatabase();
-  await db.delete("config", apiName);
+  const tx = db.transaction("config", "readwrite");
+  const store = tx.objectStore("config");
+
+  await store.delete(name);
+  await tx.done;
 }
 
-// Clear all data from IndexedDB
-export async function clearIndexedDB() {
+// Clear all servers from IndexedDB
+export async function clearIndexedDB(): Promise<void> {
   const db = await openDatabase();
   await db.clear("config");
 }
