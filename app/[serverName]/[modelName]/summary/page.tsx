@@ -16,6 +16,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import { KeyMetric } from "@/components/ui-charts/key-metric";
+import { LineChartBox } from "@/components/ui-charts/line-chart";
+import { AreaChartBox } from "@/components/ui-charts/area-chart";
+import { BarChartBox } from "@/components/ui-charts/bar-chart";
+import { HistogramBox } from "@/components/ui-charts/histogram";
+import { TestChart } from "@/components/ui-charts/test-chart";
+
 export default function RecordsSummary() {
   const { serverName, modelName: rawModelName } = useParams();
   const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
@@ -45,6 +52,22 @@ export default function RecordsSummary() {
 
   return (
     <MainLayout>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 p-6">
+        <KeyMetric title="Total Students" caption="As of today" count="1,235" />
+        <KeyMetric title="Students Created" caption="This Year" count="352" />
+        <KeyMetric title="Students Created" caption="This Month" count="24" />
+        <KeyMetric title="Students Created" caption="This Week" count="5" />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-6">
+        {/* <LineChartBox data={modelCreationData} title="Daily Student Creation Trends" /> */}
+        <TestChart />
+        <AreaChartBox data={modelCreationData} title="Student Creation Overview" />
+        <BarChartBox data={modelCreationData} title="Daily Student Counts" />
+        <HistogramBox data={modelCreationData} title="Student Creation Frequencies" />
+      </div>
+      
       <div className="p-6">
         <h1 className="text-2xl font-bold mb-4">
           {model_name} List (Server: {server})

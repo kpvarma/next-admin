@@ -16,6 +16,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 // Page Layout
 import MainLayout from "@/components/layout/main-layout";
+import { RecordCreationTrends } from "@/components/ui-charts/record-creation-trends";
+
+const modelCreationData = [
+  { date: "01", count: 12 }, // 12 students created
+  { date: "02", count: 15 }, // 15 students created
+  { date: "03", count: 10 }, // 10 students created
+  { date: "04", count: 18 }, // 18 students created
+  { date: "05", count: 20 }, // 20 students created
+  { date: "06", count: 22 }, // 22 students created
+  { date: "07", count: 25 }, // 25 students created
+  { date: "08", count: 18 }, // 18 students created
+  { date: "09", count: 15 }, // 15 students created
+  { date: "10", count: 20 }, // 20 students created
+  { date: "11", count: 22 }, // 22 students created
+  { date: "12", count: 19 }, // 19 students created
+  { date: "13", count: 23 }, // 23 students created
+  { date: "14", count: 17 }, // 17 students created
+];
 
 // Context and Utils
 import { CRUDifyServer, ModelMetaData } from "@/utils/models/definitions";
@@ -96,6 +114,10 @@ export default function ListRecords() {
           <p className="text-red-500">{error}</p>
         </div>
       )}
+
+      <div className="grid p-6">
+        <RecordCreationTrends />
+      </div>
 
       {modelData.length > 0 && (
         <div className="p-6">
