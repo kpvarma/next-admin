@@ -3,6 +3,8 @@
 import React from "react";
 import { ChevronRight, type LucideIcon } from "lucide-react";
 
+import { toTitleCase, toPluralTitleCase } from "@/utils/stringUtils";
+
 import {
   Collapsible,
   CollapsibleContent,
@@ -69,12 +71,12 @@ export function NavMain() {
                         </SidebarMenuSubButton>
                         <SidebarMenuSubButton asChild>
                           <a href={`/${activeServer?.name}/${modelData.name}`}>
-                            <span>List {modelData.name}</span>
+                            <span>List {toPluralTitleCase(modelData.name)}</span>
                           </a>
                         </SidebarMenuSubButton>
                         <SidebarMenuSubButton asChild>
                           <a href={`/${activeServer?.name}/${modelData.name}/new`}>
-                            <span>Create New {modelData.name}</span>
+                            <span>Create New {toTitleCase(modelData.name)}</span>
                           </a>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>

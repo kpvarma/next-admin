@@ -2,43 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Page Layout
 import MainLayout from "@/components/layout/main-layout";
-import { RecordCreationTrends } from "@/components/ui-charts/record-creation-trends";
+import Pagination from "@/components/general/crud-pagination";
+import CRUDTable from "@/components/general/crud-table";
 
-const modelCreationData = [
-  { date: "01", count: 12 }, // 12 students created
-  { date: "02", count: 15 }, // 15 students created
-  { date: "03", count: 10 }, // 10 students created
-  { date: "04", count: 18 }, // 18 students created
-  { date: "05", count: 20 }, // 20 students created
-  { date: "06", count: 22 }, // 22 students created
-  { date: "07", count: 25 }, // 25 students created
-  { date: "08", count: 18 }, // 18 students created
-  { date: "09", count: 15 }, // 15 students created
-  { date: "10", count: 20 }, // 20 students created
-  { date: "11", count: 22 }, // 22 students created
-  { date: "12", count: 19 }, // 19 students created
-  { date: "13", count: 23 }, // 23 students created
-  { date: "14", count: 17 }, // 17 students created
-];
-
-// Context and Utils
-import { CRUDifyServer, ModelMetaData } from "@/utils/models/definitions";
+// Context
+import { ModelMetaData, TimeSeriesDataResponse, ErrorResponse } from "@/utils/models/definitions";
 import { useServer } from "../../../context/server_context";
-import { toTitleCase } from "../../../utils/general";
+
+// APIs
+import { recordCreationTrendsData } from "@/utils/apis/model_visualisations";
 import { fetchAllRecords } from "../../../utils/apis/model_cruds";
 
 export default function ListRecords() {
@@ -69,7 +44,7 @@ export default function ListRecords() {
       setLoading(true);
       setError(null);
       try {
-        const response = await fetchAllRecords(activeServer as CRUDifyServer, modelName, currentPage, perPage);
+        const response = await fetchAllRecords(activeServer, modelName, currentPage, perPage);
         if (response.error) setError(response.error);
         else {
           setModelData(response.data || []);
@@ -96,10 +71,6 @@ export default function ListRecords() {
     }
   }, [activeServer, modelName, currentPage, perPage]);
 
-  const handlePageChange = (newPage: number) => {
-    if (newPage > 0 && newPage <= totalPages) setCurrentPage(newPage);
-  };
-
   return (
     <MainLayout>
       {loading && (
@@ -114,94 +85,26 @@ export default function ListRecords() {
           <p className="text-red-500">{error}</p>
         </div>
       )}
+      
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-4">{modelConfig?.title}</h1>
+        <p className="text-red-5001">{modelConfig?.description}</p>
 
-      <div className="grid p-6">
-        <RecordCreationTrends />
+        {/* Display CRUD Table */}
+        <CRUDTable data={modelData} currentPage={currentPage} perPage={perPage} totalCount={totalCount} />
+
+        {/* Displaay CRUD Pagination Controls */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          perPage={perPage}
+          onPageChange={(page) => setCurrentPage(page)}
+          onPerPageChange={(size) => {
+            setPerPage(size);
+            setCurrentPage(1); // Reset to first page when changing perPage
+          }}
+        />
       </div>
-
-      {modelData.length > 0 && (
-        <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">{modelConfig?.title}</h1>
-          <p className="text-red-5001">{modelConfig?.description}</p>
-          <Table className="mt-10">
-            <TableCaption>
-              Showing {currentPage}-{perPage} of {totalCount}.
-            </TableCaption>
-            <TableHeader>
-              <TableRow>
-                {Object.keys(modelData[0]).map((key) => (
-                  <TableHead key={key}>{toTitleCase(key)}</TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {modelData.map((item, index) => (
-                <TableRow key={index}>
-                  {Object.keys(item).map((key) => (
-                    <TableCell key={key}>{item[key]}</TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {/* Pagination Controls */}
-          <div className="flex items-center justify-between mt-6">
-            {/* Items per Page */}
-            <div className="flex items-center space-x-2">
-              <label htmlFor="perPage" className="text-sm font-medium">Rows per page:</label>
-              <Select
-                value={String(perPage)}
-                onValueChange={(value) => setPerPage(Number(value))}
-              >
-                <SelectTrigger className="w-24">
-                  <SelectValue placeholder={String(perPage)} />
-                </SelectTrigger>
-                <SelectContent>
-                  {[5, 10, 20, 50].map((size) => (
-                    <SelectItem key={size} value={String(size)}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Pagination */}
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Previous
-              </Button>
-
-              {/* Page Numbers */}
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={page === currentPage ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </Button>
-              ))}
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </MainLayout>
   );
 }

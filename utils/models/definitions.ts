@@ -30,3 +30,21 @@ export interface ModelListData {
     totalCount: number; // Total number of records
     error: string | null; // Error message or null
 }
+
+export interface ErrorResponse {
+    data: any[] | null, 
+    error: string
+}
+
+export interface TimeSeriesDataResponse {
+    timeSeriesData: { date: string; created: number; updated: number }[];
+    createdThisMonth: number;
+    updatedThisMonth: number;
+    createdThisWeek: number;
+    updatedThisWeek: number;
+    createdLastMonth: number;
+    updatedLastMonth: number;
+    createdLastWeek: number;
+    updatedLastWeek: number;
+}
+  
