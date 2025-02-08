@@ -10,6 +10,10 @@ import Pagination from "@/components/general/crud-pagination";
 import CollectionWidget from "@/components/widgets/CollectionWidget";
 import CRUDTable from "@/components/general/crud-table";
 
+// Styles Imports
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+
 // Context
 import { ModelMetaData, WidgetData } from "@/utils/models/definitions";
 import { useServer } from "../../../context/server_context";
@@ -114,18 +118,20 @@ export default function ListRecords() {
       )}
 
       {widgetsData?.visualisations && Object.keys(widgetsData.visualisations).length > 0 && (
-        <div className="p-6">
-          {widgetsData && widgetsData.visualisations ? (
-            Object.entries(widgetsData.visualisations).map(([key, collection]) => (
-              <div key={key} data-grid={collection.display}>
-                <CollectionWidget collection={collection} activeServer={activeServer} modelName={modelName} />
-              </div>
-            ))
-          ) : null}
+        <div className="p-2">
+          <GridLayout className="layout" cols={12} rowHeight={20} width={1200}>
+            {widgetsData && widgetsData.visualisations ? (
+              Object.entries(widgetsData.visualisations).map(([key, collection]) => (
+                <div key={key} data-grid={collection.display}>
+                  <CollectionWidget collection={collection} activeServer={activeServer} modelName={modelName} />
+                </div>
+              ))
+            ) : null}
+          </GridLayout>
         </div>
       )}
       
-      <div className="p-6">
+      <div className="grid p-6">
         <h1 className="text-2xl font-bold">{modelConfig?.title}</h1>
         <p className="text-red-5001">{modelConfig?.description}</p>
 

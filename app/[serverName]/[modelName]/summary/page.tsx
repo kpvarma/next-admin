@@ -9,6 +9,10 @@ import MainLayout from "@/components/layout/main-layout";
 import CollectionWidget from "@/components/widgets/CollectionWidget";
 import { RecordCreationTrends } from "@/components/ui-charts/record-creation-trends";
 
+// Styles Imports
+import "react-grid-layout/css/styles.css";
+import "react-resizable/css/styles.css";
+
 // Context
 import { ModelMetaData, TimeSeriesDataResponse, ErrorResponse, WidgetData } from "@/utils/models/definitions";
 import { useServer } from "../../../../context/server_context";
@@ -112,7 +116,7 @@ export default function SummaryPage() {
         </GridLayout>
       </div>
 
-      <div className="grid p-6">
+      <div className="grid p-4">
         {timeSeriesData && (
           <RecordCreationTrends timeSeriesDataResponse={timeSeriesData} />
         )}
