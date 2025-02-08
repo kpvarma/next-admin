@@ -4,19 +4,14 @@ const SingleMetric = ({ metric, data }: { metric: Metric; data: any }) => {
   // Extract the first highlight
   const highlight = metric.highlights.length > 0 ? metric.highlights[0] : null;
 
-  console.log("data: ", data);
-  console.log("metric.highlights: ", metric.highlights);
-
   // Extract corresponding value from data
   const item = highlight ? {
     label: highlight.title,
     value: data[highlight.value] || 0,
   } : null;
 
-  console.log("item: ", item);
-
   return (
-    <div className="p-4 w-full flex flex-col items-center text-center">
+    <div className="w-full flex flex-col">
       {/* Title & Caption (Optional) */}
       {metric.title && (
         <div className="mb-4">
@@ -28,6 +23,7 @@ const SingleMetric = ({ metric, data }: { metric: Metric; data: any }) => {
       {/* Highlight Display */}
       {item ? (
         <div>
+          <span className="tracking-tight text-sm font-normal">{item.label}</span>
           <div className="text-2xl font-bold">{item.value.toLocaleString()}</div>
           <span className="text-xs text-muted-foreground">{item.label}</span>
         </div>

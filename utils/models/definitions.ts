@@ -38,7 +38,7 @@ export interface ModelListData {
 }
 
 export interface TimeSeriesDataResponse {
-    timeSeriesData: { date: string; created: number; updated: number }[];
+    data: { date: string; created: number; updated: number }[];
     createdThisMonth: number;
     updatedThisMonth: number;
     createdThisWeek: number;
@@ -84,7 +84,6 @@ export interface Metric {
 }
 
 export interface Collection {
-  collection_type: string;
   title: string;
   caption: string;
   api_end_point: string;

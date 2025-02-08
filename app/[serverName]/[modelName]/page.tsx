@@ -4,16 +4,18 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 // Page Layout
+import GridLayout from "react-grid-layout";
 import MainLayout from "@/components/layout/main-layout";
 import Pagination from "@/components/general/crud-pagination";
+import CollectionWidget from "@/components/widgets/CollectionWidget";
 import CRUDTable from "@/components/general/crud-table";
 
 // Context
-import { ModelMetaData } from "@/utils/models/definitions";
+import { ModelMetaData, WidgetData } from "@/utils/models/definitions";
 import { useServer } from "../../../context/server_context";
 
 // APIs
-import { recordCreationTrendsData } from "@/utils/apis/model_visualisations";
+import { fetchIndexMetadata } from "@/utils/apis/models_metadata";
 import { fetchAllRecords } from "../../../utils/apis/model_cruds";
 
 export default function ListRecords() {
@@ -21,6 +23,8 @@ export default function ListRecords() {
   const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
 
   const { activeServer, setActiveServer, servers } = useServer();
+
+  const [widgetsData, setWidgetsData] = useState<WidgetData|{}>([]);
 
   const [modelData, setModelData] = useState<any[]>([]);
   const [modelConfig, setModelConfig] = useState<ModelMetaData | null>(null);
@@ -36,6 +40,28 @@ export default function ListRecords() {
     const matchedServer = servers.find((server) => server.name === serverName);
     if (matchedServer) setActiveServer(matchedServer);
   }, [serverName, servers, setActiveServer]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!activeServer) return;
+
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchIndexMetadata(activeServer, modelName);
+        if (response.error) setError(response.error);
+        else {
+          setWidgetsData(response.data || []);
+        }
+      } catch (err: any) {
+        setError(err.message || "An unexpected error occurred.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [activeServer, modelName]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,9 +99,10 @@ export default function ListRecords() {
 
   return (
     <MainLayout>
+      
       {loading && (
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Loading {modelConfig?.title}...</h1>
+          <h1 className="text-2xl font-bold mb-4">Loading ...</h1>
         </div>
       )}
 
@@ -85,9 +112,21 @@ export default function ListRecords() {
           <p className="text-red-500">{error}</p>
         </div>
       )}
+
+      {widgetsData?.visualisations && Object.keys(widgetsData.visualisations).length > 0 && (
+        <div className="p-6">
+          {widgetsData && widgetsData.visualisations ? (
+            Object.entries(widgetsData.visualisations).map(([key, collection]) => (
+              <div key={key} data-grid={collection.display}>
+                <CollectionWidget collection={collection} activeServer={activeServer} modelName={modelName} />
+              </div>
+            ))
+          ) : null}
+        </div>
+      )}
       
       <div className="p-6">
-        <h1 className="text-2xl font-bold mb-4">{modelConfig?.title}</h1>
+        <h1 className="text-2xl font-bold">{modelConfig?.title}</h1>
         <p className="text-red-5001">{modelConfig?.description}</p>
 
         {/* Display CRUD Table */}

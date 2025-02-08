@@ -32,7 +32,7 @@ interface RecordCreationTrendsProps {
 
 export function RecordCreationTrends({ timeSeriesDataResponse }: RecordCreationTrendsProps) {
   const { 
-    timeSeriesData = [], 
+    data = [], 
     createdThisMonth = 0, updatedThisMonth = 0, 
     createdThisWeek = 0, updatedThisWeek = 0, 
     createdLastMonth = 0, updatedLastMonth = 0, 
@@ -42,9 +42,9 @@ export function RecordCreationTrends({ timeSeriesDataResponse }: RecordCreationT
   const [activeChart, setActiveChart] = React.useState<keyof typeof chartConfig>("created");
 
   const total = React.useMemo(() => ({
-    created: timeSeriesData.reduce((acc, curr) => acc + curr.created, 0),
-    updated: timeSeriesData.reduce((acc, curr) => acc + curr.updated, 0),
-  }), [timeSeriesData]);
+    created: data.reduce((acc, curr) => acc + curr.created, 0),
+    updated: data.reduce((acc, curr) => acc + curr.updated, 0),
+  }), [data]);
 
   return (
     <div>
@@ -99,7 +99,7 @@ export function RecordCreationTrends({ timeSeriesDataResponse }: RecordCreationT
           <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
             <BarChart
               accessibilityLayer
-              data={timeSeriesData}
+              data={data}
               margin={{ left: 12, right: 12 }}
             >
               <CartesianGrid vertical={false} />

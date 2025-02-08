@@ -45,9 +45,10 @@ export async function fetchDashboardMetadata(activeServer: CRUDifyServer): Promi
 }
 
 // Fetch summary metadata (single model)
-export async function fetchSummaryMetadata(activeServer: CRUDifyServer, modelName: string): Promise<{ data: WidgetData | null; error: string }> {
+export async function fetchSummaryMetadata(activeServer: CRUDifyServer, modelName: string | undefined): Promise<{ data: WidgetData | null; error: string }> {
   try {
     console.log("Fetching Summary Metadata for:", modelName);
+    console.log("Url:", `${activeServer.apiURL}/crudify/api/v1/metadata/summary_visualisations/${modelName}`);
     
     const response = await fetch(`${activeServer.apiURL}/crudify/api/v1/metadata/summary_visualisations/${modelName}`, {
       method: "GET",

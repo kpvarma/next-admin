@@ -41,7 +41,7 @@ export async function recordCreationTrendsData(
     try {
       const json = await response.json();
       return {
-        timeSeriesData: json.time_series_data || [],
+        data: json.data || [],
         createdThisMonth: json.created_this_month || 0,
         updatedThisMonth: json.updated_this_month || 0,
         createdThisWeek: json.created_this_week || 0,
@@ -53,7 +53,7 @@ export async function recordCreationTrendsData(
         error: null,
       };
     } catch (e) {
-      return { timeSeriesData: [], error: "Failed to parse server response." };
+      return { data: [], error: "Failed to parse server response." };
     }
   } catch (error: any) {
     return {

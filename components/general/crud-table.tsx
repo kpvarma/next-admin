@@ -27,7 +27,7 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ data, currentPage, perPage, total
   }
 
   return (
-    <Table className="mt-10">
+    <Table className="mt-2">
       <TableCaption>
         Showing {currentPage}-{perPage} of {totalCount}.
       </TableCaption>

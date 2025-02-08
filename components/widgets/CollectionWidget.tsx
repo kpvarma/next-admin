@@ -72,7 +72,7 @@ const CollectionWidget = ({ collection, activeServer, modelName }: { collection:
             className={`grid gap-4 w-full`}
             style={{
               display: "grid",
-              gridTemplateColumns: `repeat(${Math.min(4, collection.metrics.length)}, minmax(120px, 1fr))`
+              gridTemplateColumns: `repeat(${Math.min(8, collection.metrics.length)}, minmax(0, 1fr))`
             }}
           >
             {collection.metrics.map((metric) => (

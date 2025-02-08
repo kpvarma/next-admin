@@ -4,23 +4,27 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
 // Page Layout
+import GridLayout from "react-grid-layout";
 import MainLayout from "@/components/layout/main-layout";
+import CollectionWidget from "@/components/widgets/CollectionWidget";
 import { RecordCreationTrends } from "@/components/ui-charts/record-creation-trends";
 
 // Context
-import { ModelMetaData, TimeSeriesDataResponse, ErrorResponse } from "@/utils/models/definitions";
+import { ModelMetaData, TimeSeriesDataResponse, ErrorResponse, WidgetData } from "@/utils/models/definitions";
 import { useServer } from "../../../../context/server_context";
 
 // APIs
+import { fetchSummaryMetadata } from "@/utils/apis/models_metadata";
 import { recordCreationTrendsData } from "@/utils/apis/model_visualisations";
 
-export default function ListRecords() {
-  const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesDataResponse | null>(null);
+export default function SummaryPage() {
   const { serverName, modelName: rawModelName } = useParams();
   const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
 
   const { activeServer, setActiveServer, servers } = useServer();
-  const [modelConfig, setModelConfig] = useState<ModelMetaData | null>(null);
+
+  const [widgetsData, setWidgetsData] = useState<WidgetData|{}>([]);
+  const [timeSeriesData, setTimeSeriesData] = useState<TimeSeriesDataResponse | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +35,28 @@ export default function ListRecords() {
   }, [serverName, servers, setActiveServer]);
 
   useEffect(() => {
+    const fetchData = async () => {
+      if (!activeServer) return;
+
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchSummaryMetadata(activeServer, modelName);
+        if (response.error) setError(response.error);
+        else {
+          setWidgetsData(response.data || []);
+        }
+      } catch (err: any) {
+        setError(err.message || "An unexpected error occurred.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [activeServer, modelName]);
+
+  useEffect(() => {
     async function loadData() {
       setLoading(true);
       
@@ -38,10 +64,12 @@ export default function ListRecords() {
 
       const response = await recordCreationTrendsData(activeServer, modelName);
 
+      console.log("response: ", response);
+
       function isTimeSeriesDataResponse(
         response: TimeSeriesDataResponse | ErrorResponse
       ): response is TimeSeriesDataResponse {
-        return (response as TimeSeriesDataResponse).timeSeriesData !== undefined;
+        return (response as TimeSeriesDataResponse).data !== undefined;
       }
 
       if (isTimeSeriesDataResponse(response)) {
@@ -58,9 +86,10 @@ export default function ListRecords() {
 
   return (
     <MainLayout>
+
       {loading && (
         <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Loading {modelConfig?.title}...</h1>
+          <h1 className="text-2xl font-bold mb-4">Loading ...</h1>
         </div>
       )}
 
@@ -70,6 +99,18 @@ export default function ListRecords() {
           <p className="text-red-500">{error}</p>
         </div>
       )}
+
+      <div className="p-2">
+        <GridLayout className="layout" cols={12} rowHeight={20} width={1200}>
+          {widgetsData && widgetsData.visualisations ? (
+            Object.entries(widgetsData.visualisations).map(([key, collection]) => (
+              <div key={key} data-grid={collection.display}>
+                <CollectionWidget collection={collection} activeServer={activeServer} modelName={modelName} />
+              </div>
+            ))
+          ) : null}
+        </GridLayout>
+      </div>
 
       <div className="grid p-6">
         {timeSeriesData && (
