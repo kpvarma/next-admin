@@ -16,7 +16,6 @@ export default function AddModel() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Submitted Data:", formData);
     alert(`Added ${modelName}: ${formData.name}`);
   };
 

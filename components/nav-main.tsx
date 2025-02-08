@@ -43,6 +43,10 @@ export function NavMain() {
   return (
     <SidebarGroup>
       
+      <a href={`/${activeServer?.name}/dashboard`} className="mt-4">
+        <span>Dashboard</span>
+      </a>
+      
       {Object.keys(groupedData).map((parent) => (
         <div key={parent} className="sidebar-group">
           <SidebarGroupLabel className="mt-4">{parent}</SidebarGroupLabel>

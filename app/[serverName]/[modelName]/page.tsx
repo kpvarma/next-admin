@@ -9,7 +9,7 @@ import Pagination from "@/components/general/crud-pagination";
 import CRUDTable from "@/components/general/crud-table";
 
 // Context
-import { ModelMetaData, TimeSeriesDataResponse, ErrorResponse } from "@/utils/models/definitions";
+import { ModelMetaData } from "@/utils/models/definitions";
 import { useServer } from "../../../context/server_context";
 
 // APIs

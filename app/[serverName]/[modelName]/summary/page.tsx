@@ -8,7 +8,7 @@ import MainLayout from "@/components/layout/main-layout";
 import { RecordCreationTrends } from "@/components/ui-charts/record-creation-trends";
 
 // Context
-import { CRUDifyServer, ModelMetaData, TimeSeriesDataResponse, ErrorResponse } from "@/utils/models/definitions";
+import { ModelMetaData, TimeSeriesDataResponse, ErrorResponse } from "@/utils/models/definitions";
 import { useServer } from "../../../../context/server_context";
 
 // APIs
