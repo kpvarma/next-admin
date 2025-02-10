@@ -29,11 +29,14 @@ import { Plus, Trash } from "lucide-react";
 import RandomImageWithQuote from "@/components/general/random-quotes";
 
 // Utils Import
-import { fetchAllFromIndexedDB, deleteByApiName } from "@/utils/indexdb";
+import { saveToIndexedDB, fetchAllFromIndexedDB, deleteByApiName } from "@/utils/indexdb";
+import { fetchModelsMetaData } from "@/utils/apis/models_metadata";
 import { useServer } from "../../context/server_context";
 
 export default function ListServers() {
   const { activeServer, setActiveServer, servers, setServers } = useServer(); // Access server context
+  const [errors, setErrors] = useState<{ apiName?: string; apiURL?: string; apiKey?: string }>({});
+  
   const router = useRouter();
 
   const handleDelete = async (name: string) => {
@@ -59,6 +62,35 @@ export default function ListServers() {
   const handleLaunch = (server: any) => {
     console.log("Launch server:", server);
     router.push(`/${server.name}/dashboard`); // Navigate to the dashboard page
+  };
+  
+  const handleRefresh = async (server: any) => {
+    console.log("Refresh server metadata:", server);
+
+    if(!activeServer){
+      return
+    }
+
+    // Fetch user types from the API
+    const { data: modelMetaData, error: modelMetaDataError } = await fetchModelsMetaData(activeServer);
+
+    if (modelMetaDataError) {
+      setErrors({ apiKey: modelMetaDataError });
+      return;
+    }
+    
+    // Update modelMetaData in activeServer
+    const updatedActiveServer = { ...activeServer, modelMetaData };
+
+    // Update servers list by replacing the modified activeServer
+    const updatedServers = servers.map((server) =>
+      server.id === activeServer.id ? updatedActiveServer : server
+    );
+
+    // Update state
+    setServers(updatedServers);
+    await saveToIndexedDB(updatedServers);
+    
   };
 
   return (
@@ -115,6 +147,16 @@ export default function ListServers() {
                     <TableCell className="font-medium">{server.name}</TableCell>
                     <TableCell>{server.apiURL}</TableCell>
                     <TableCell className="text-right">
+                      <Button
+                        variant="outline"
+                        className="mr-2"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRefresh(server);
+                        }}
+                      >
+                        Refresh
+                      </Button>
                       <Button
                         variant="outline"
                         className="mr-2"

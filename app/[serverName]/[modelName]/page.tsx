@@ -136,7 +136,7 @@ export default function ListRecords() {
         <p className="text-red-5001">{modelConfig?.description}</p>
 
         {/* Display CRUD Table */}
-        <CRUDTable data={modelData} currentPage={currentPage} perPage={perPage} totalCount={totalCount} />
+        <CRUDTable metadata={modelConfig} data={modelData} currentPage={currentPage} perPage={perPage} totalCount={totalCount} loading={loading}/>
 
         {/* Displaay CRUD Pagination Controls */}
         <Pagination
