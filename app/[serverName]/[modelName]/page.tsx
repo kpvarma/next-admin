@@ -3,153 +3,113 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
-// Page Layout
-import GridLayout from "react-grid-layout";
-import MainLayout from "@/components/layout/main-layout";
-import Pagination from "@/components/general/crud-pagination";
-import CollectionWidget from "@/components/widgets/CollectionWidget";
-import CRUDTable from "@/components/general/crud-table";
-
 // Styles Imports
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
+// Page Layout
+import GridLayout from "react-grid-layout";
+import MainLayout from "@/components/layout/main-layout";
+import CollectionWidget from "@/components/widgets/CollectionWidget";
+import CrudifyAlert from "@/components/general/alert";
+import CRUDTabs from "@/components/general/crud-tabs";
+
 // Context
-import { ModelMetaData, WidgetData } from "@/utils/models/definitions";
+import { Widget } from "@/utils/models/definitions";
 import { useServer } from "../../../context/server_context";
 
 // APIs
-import { fetchIndexMetadata } from "@/utils/apis/models_metadata";
-import { fetchAllRecords } from "../../../utils/apis/model_cruds";
+import { fetchSummaryMetadata } from "@/utils/apis/metadata";
 
-export default function ListRecords() {
+export default function SummaryPage() {
+  const { activeServer, setActiveServer, servers } = useServer();
+  const [summaryMetaData, setSummaryMetaData] = useState<Record<string, any> | null>(null);
+
   const { serverName, modelName: rawModelName } = useParams();
   const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
-
-  const { activeServer, setActiveServer, servers } = useServer();
-
-  const [widgetsData, setWidgetsData] = useState<WidgetData|{}>([]);
-
-  const [modelData, setModelData] = useState<any[]>([]);
-  const [modelConfig, setModelConfig] = useState<ModelMetaData | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [perPage, setPerPage] = useState<number>(10);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
   
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{type: "error" | "info" | "success" | null, heading: string; description: string}>({type: null, heading: '', description: ''});
 
   useEffect(() => {
+    if(activeServer) return;
     const matchedServer = servers.find((server) => server.name === serverName);
     if (matchedServer) setActiveServer(matchedServer);
   }, [serverName, servers, setActiveServer]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      if (!activeServer) return;
+    if (!activeServer || !modelName || summaryMetaData) return;
 
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetchIndexMetadata(activeServer, modelName);
-        if (response.error) setError(response.error);
-        else {
-          setWidgetsData(response.data || []);
-        }
-      } catch (err: any) {
-        setError(err.message || "An unexpected error occurred.");
-      } finally {
+    const summaryPages = activeServer?.metaData?.summary_pages;
+    const modelMetaData = activeServer?.metaData?.models.find((m) => m.name === modelName);
+    console.log("summaryPages: ", summaryPages);
+    console.log("modelMetaData: ", modelMetaData);
+
+    if(summaryPages && modelMetaData){
+
+      if(!modelMetaData.summary_page){
+        setAlert({type: "error", heading: "Error!", description: `Summary Page for the model '${modelName}' not found. Please review the configuration` });
         setLoading(false);
+        return;
       }
-    };
 
-    fetchData();
-  }, [activeServer, modelName]);
+      const sMetaData = summaryPages[modelMetaData.summary_page];
+      console.log("sMetaData: ", sMetaData);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!activeServer || !modelName) return;
-
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetchAllRecords(activeServer, modelName, currentPage, perPage);
-        if (response.error) setError(response.error);
-        else {
-          setModelData(response.data || []);
-          setCurrentPage(response.currentPage);
-          setPerPage(response.perPage);
-          setTotalCount(response.totalCount);
-          setTotalPages(response.totalPages);
-        }
-      } catch (err: any) {
-        setError(err.message || "An unexpected error occurred.");
-      } finally {
+      if (sMetaData) {
+        setSummaryMetaData(sMetaData);
+      } else {
         setLoading(false);
-      }
-    };
-
-    fetchData();
-
-    // Set modelConfig
-    if (activeServer?.modelMetaData && activeServer?.modelMetaData.length > 0) {
-      const metaData = activeServer?.modelMetaData.find((mdata) => mdata.name === modelName);
-      if (metaData) {
-        setModelConfig(metaData);
+        setAlert({type: "error", heading: "Error!", description: `Summary Page is not configured for the model '${modelName}'. Please review the configuration` });
       }
     }
-  }, [activeServer, modelName, currentPage, perPage]);
+  }, [activeServer, modelName]);
+
+  // Ensure loading is updated after `summaryMetaData` is set
+  useEffect(() => {
+    if (summaryMetaData) {
+      setLoading(false);
+      if(summaryMetaData.widgets.length === 0) {
+        setAlert({type: "error", heading: "Error!", description: `No Widgets configured for the summary page for the model '${modelName}'. Please review the configuration` });
+      }
+    }
+  }, [summaryMetaData]);
 
   return (
     <MainLayout>
-      
-      {loading && (
-        <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Loading ...</h1>
-        </div>
-      )}
-
-      {error && (
-        <div className="p-6">
-          <h1 className="text-2xl font-bold mb-4">Error</h1>
-          <p className="text-red-500">{error}</p>
-        </div>
-      )}
-
-      {widgetsData?.visualisations && Object.keys(widgetsData.visualisations).length > 0 && (
-        <div className="p-2">
-          <GridLayout className="layout" cols={12} rowHeight={20} width={1200}>
-            {widgetsData && widgetsData.visualisations ? (
-              Object.entries(widgetsData.visualisations).map(([key, collection]) => (
-                <div key={key} data-grid={collection.display}>
-                  <CollectionWidget collection={collection} activeServer={activeServer} modelName={modelName} />
-                </div>
-              ))
-            ) : null}
-          </GridLayout>
-        </div>
-      )}
-      
-      <div className="grid p-6">
-        <h1 className="text-2xl font-bold">{modelConfig?.title}</h1>
-        <p className="text-red-5001">{modelConfig?.description}</p>
-
-        {/* Display CRUD Table */}
-        <CRUDTable metadata={modelConfig} data={modelData} currentPage={currentPage} perPage={perPage} totalCount={totalCount} loading={loading}/>
-
-        {/* Displaay CRUD Pagination Controls */}
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          perPage={perPage}
-          onPageChange={(page) => setCurrentPage(page)}
-          onPerPageChange={(size) => {
-            setPerPage(size);
-            setCurrentPage(1); // Reset to first page when changing perPage
-          }}
-        />
+      <div className="px-2">
+        {modelName && (
+          <CRUDTabs modelName={modelName} recordId={null} />
+        )}
+        
+        {/* Show Loading */}
+        {loading ? (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4 text-center">Loading ...</h1>
+          </div>
+        ) : (
+          <>
+            {alert && alert.type && <CrudifyAlert alertData={alert} />} {/* Alert Box */}
+          </>
+        )}
       </div>
+    
+      <div className="p-2">
+        <GridLayout className="layout" cols={12} rowHeight={20} width={1200}>
+          {
+            summaryMetaData?.widgets?.map((widget: Widget, index: number) => (
+              <div key={index} data-grid={widget.position}>
+                <CollectionWidget 
+                  collection={widget.collection}
+                  activeServer={activeServer} 
+                  modelName={widget.model} 
+                />
+              </div>
+            ))
+          }
+        </GridLayout>
+      </div>
+      
     </MainLayout>
   );
 }

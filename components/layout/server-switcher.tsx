@@ -32,7 +32,7 @@ export function ServerSwitcher() {
 
   const handleServerSelect = (server: typeof servers[0]) => {
     setActiveServer(server) // Update the active server in context
-    router.push(`/${server.name}/dashboard`) // Navigate to the new route
+    router.push(`/${server.name}/home`) // Navigate to the new route
   }
 
   return (
@@ -90,7 +90,7 @@ export function ServerSwitcher() {
               </Link>  
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 p-2">
-              <Link href="/configure/new">
+              <Link href="/configure/">
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Server className="size-4" />
                 </div>

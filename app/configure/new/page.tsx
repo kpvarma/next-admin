@@ -17,7 +17,7 @@ import { useServer } from "../../../context/server_context";
 
 // Utils Import
 import { validateAPIUrl, validateAPIKey } from "@/utils/apis/api_key";
-import { fetchModelsMetaData } from "@/utils/apis/models_metadata";
+import { fetchMetaData } from "@/utils/apis/metadata";
 import {
   saveToIndexedDB,
   fetchAllFromIndexedDB,
@@ -39,10 +39,6 @@ export default function NewServerPage() {
   const [activeAccordion, setActiveAccordion] = useState("step1");
   
   const router = useRouter();
-
-  useEffect(() => {
-    
-  }, []);
 
   const handleApiNameChange = (input: string) => {
     // Convert input to a URL-friendly format
@@ -101,21 +97,21 @@ export default function NewServerPage() {
           name: apiName,
           apiURL: apiURL,
           apiKey: apiKey,
-          modelMetaData: []
+          metaData: null
         };
 
         // Fetch user types from the API
-        const { data: modelMetaData, error: modelMetaDataError } = await fetchModelsMetaData(newServer);
+        const { data: metaData, error: metaDataError } = await fetchMetaData(newServer);
     
-        if (modelMetaDataError) {
-          setErrors({ apiKey: modelMetaDataError });
+        if (metaDataError) {
+          setErrors({ apiKey: metaDataError });
           setStep3Complete(false);
           setActiveAccordion("step3");
           return;
         }
         
-        // Save modelMetaData on new Server
-        newServer.modelMetaData = modelMetaData;
+        // Save metaData on new Server
+        newServer.metaData = metaData;
         
         // Save server details and user types to server context
         setServers([...servers, newServer]);
@@ -133,7 +129,7 @@ export default function NewServerPage() {
     
         // Navigate to /configure after success
         // router.push("/configure");
-        router.push(`/${apiName}/dashboard`) // Navigate to the new route
+        router.push(`/${apiName}/home`) // Navigate to the new route
       } catch (fetchError) {
         setErrors({ apiKey: "Failed to fetch and save server details. Please try again." });
         console.error("Error!", fetchError);

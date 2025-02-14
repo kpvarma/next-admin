@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchCollectionData } from "@/utils/apis/models_metadata";
+import { fetchCollectionData } from "@/utils/apis/visualisations";
 import { Collection } from "@/utils/models/definitions";
 import MetricWidget from "./MetricWidget";
 
@@ -12,13 +12,13 @@ const CollectionWidget = ({ collection, activeServer, modelName }: { collection:
   useEffect(() => {
 
     if (!activeServer || !collection.api_end_point) return;
-  
+
     const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await fetchCollectionData(activeServer, modelName, collection.api_end_point);
-        // console.log("Response: ", response);
+        console.log("Response: ", response);
         
         if (response.error) {
           setError(response.error);
@@ -33,12 +33,7 @@ const CollectionWidget = ({ collection, activeServer, modelName }: { collection:
     };
   
     fetchData();
-  
-    if (collection.refresh_interval && collection.refresh_interval > 0) {
-      const interval = setInterval(fetchData, collection.refresh_interval * 1000);
-      return () => clearInterval(interval);
-    }
-  }, [activeServer, modelName, collection.api_end_point, collection.refresh_interval]);
+  }, [activeServer, modelName, collection.api_end_point]);
 
   return (
     <div className="p-4 rounded-xl border bg-card text-card-foreground shadow w-full">

@@ -1,11 +1,11 @@
 // apis/models_metadata.ts
 
-import { WidgetData, CRUDifyServer } from "@/utils/models/definitions";
+import { MetaData, CRUDifyServer } from "@/utils/models/definitions";
 
-// Fetch user types
-export async function fetchModelsMetaData(activeServer: CRUDifyServer): Promise<{ data: WidgetData[] | null; error: string }> {
+// Fetch metadata
+export async function fetchMetaData(activeServer: CRUDifyServer): Promise<{ data: MetaData | null; error: string }> {
   try {
-    console.log("Fetching Models Metadata from: ", `${activeServer.apiURL}/crudify/api/v1/metadata`);
+    console.log("Fetching Metadata from: ", `${activeServer.apiURL}/crudify/api/v1/metadata`);
 
     const response = await fetch(`${activeServer.apiURL}/crudify/api/v1/metadata`, {
       method: "GET",
@@ -16,7 +16,7 @@ export async function fetchModelsMetaData(activeServer: CRUDifyServer): Promise<
       return { data: null, error: "Failed to fetch user types. Please check your API URL and key." };
     }
 
-    const data: WidgetData[] = await response.json();
+    const data: MetaData = await response.json();
     return { data, error: "" };
   } catch (error) {
     return { data: null, error: "Server is not reachable. Please check your API URL and key." };
@@ -24,7 +24,7 @@ export async function fetchModelsMetaData(activeServer: CRUDifyServer): Promise<
 }
 
 // Fetch dashboard metadata (multiple models)
-export async function fetchDashboardMetadata(activeServer: CRUDifyServer): Promise<{ data: WidgetData[] | null; error: string }> {
+export async function fetchDashboardMetadataOld(activeServer: CRUDifyServer): Promise<{ data: WidgetData[] | null; error: string }> {
   try {
     console.log("Fetching Dashboard Metadata from: ", `${activeServer.apiURL}/crudify/api/v1/metadata/dashboard_visualisations`);
     
@@ -81,31 +81,6 @@ export async function fetchIndexMetadata(activeServer: CRUDifyServer, modelName:
     }
 
     const data: WidgetData = await response.json();
-    return { data, error: "" };
-  } catch (error) {
-    return { data: null, error: "Server is not reachable. Please check API URL and key." };
-  }
-}
-
-// Fetch data for a collection widget
-export async function fetchCollectionData(activeServer: CRUDifyServer, modelName: string | null, apiEndPoint: string): Promise<{ data: any | null; error: string }> {
-  try {
-    const url = modelName
-      ? `${activeServer.apiURL}/crudify/api/v1/visualisations/${modelName}/${apiEndPoint}`
-      : `${activeServer.apiURL}/crudify/api/v1/visualisations/${apiEndPoint}`;
-
-    console.log(`[${new Date().toISOString()}] Fetching Collection Data from:`, url);
-
-    const response = await fetch(url, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${activeServer.apiKey}` },
-    });
-
-    if (!response.ok) {
-      return { data: null, error: "Failed to fetch collection data. Please check API URL and key." };
-    }
-
-    const data = await response.json();
     return { data, error: "" };
   } catch (error) {
     return { data: null, error: "Server is not reachable. Please check API URL and key." };

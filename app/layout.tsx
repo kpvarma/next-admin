@@ -1,20 +1,23 @@
+"use client";
+
 // app/layout.tsx (Server Component)
 import "./globals.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
+
 import { ThemeProvider } from "../components/theme-provider"; // Adjust the path as necessary
 import { ServerProvider } from "../context/server_context"; // Adjust the path as necessary
 
-export const metadata = { 
-  title: "Next.js with Crudify", 
-  description: "RailsAdmin like interface built with next.js and CRUDify" 
-};
-
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => new QueryClient());
   return (
     <html lang="en">
       <body>
         <ThemeProvider>
           <ServerProvider>
-            <div className="flex flex-col h-screen">{children}</div>
+            <QueryClientProvider client={queryClient}>
+              <div className="flex flex-col h-screen">{children}</div>
+            </QueryClientProvider>
           </ServerProvider>
         </ThemeProvider>
       </body>

@@ -1,10 +1,18 @@
+// -------
+// Server
+// -------
+
 // Defining the types for the Server
 export interface CRUDifyServer {
   name: string | null;
   apiURL: string | null;
   apiKey: string | null;
-  modelMetaData?: ModelMetaData[] | null; // Array to hold multiple model metadata
+  metaData?: MetaData | null;
 }
+
+// ---------
+// General
+// ---------
 
 // Generic Error Response type
 export interface ErrorResponse {
@@ -12,22 +20,111 @@ export interface ErrorResponse {
   error: string
 }
 
-// Defining the types for the Model Menu
-export interface ModelMenu {
-    priority: string;
-    label: string;
-    parent: string;
+// ---------
+// Metadata
+// ---------
+
+export interface MetaData{
+  nav_menu: NavMenu[],
+
+  dashboards: Record<string, any>,
+  summary_pages: Record<string, any>,
+  index_pages: Record<string, any>,
+  reports: Record<string, any>,
+  
+  models: ModelConfig[],
+  visuals: Record<string, any>,
 }
 
-// Defining the types for the Model Meta Data
-export interface ModelMetaData {
-    name: string;
-    menu: ModelMenu;
-    title: string;
-    description: string;
-    is_devise_model: boolean;
+export interface ModelConfig {
+  name: string;
+  menu: ModelMenu;
+  title: string;
+  description: string;
+  summary_page: string;
+  is_devise_model: boolean;
+  attributes: ModelAttribute[];
+  associations: ModelAssociation[];
+  columns: ModelColumn[];
+  form_fields: { fields: any[] };  // Keeping as any[] for flexibility
+  per_page: number[];
+  scopes: { name: string; label: string; default: boolean }[];
+  filters: any[];  // Keeping as any[] for flexibility
+  api_end_points: string[];
+  custom_member_actions: { action_name: string; method: string; logic: any }[];
+  custom_collection_actions: { action_name: string; method: string; logic: any }[];
 }
-  
+
+export interface VisualConfig {
+  summary_title: string;
+  summary_description: string;
+  metrics: Metric[];
+  collection_visualisations: Collection[];
+  entity_visualisations: Collection[];
+}
+
+// Widget Config
+// -------------
+
+// Defines a widget structure
+export interface Widget {
+  name: string;
+  model: string;
+  collection: Collection;
+  position: WidgetPosition;
+  refresh_interval?: number;
+}
+
+// Defines the position of a widget
+export interface WidgetPosition {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+// Menu Config
+// -----------
+
+export interface NavMenu {
+  type: string;       // Type of the menu item (e.g., "home", "page")
+  name: string;       // Unique name identifier (e.g., "dashboard")
+  label: string;      // Display label (e.g., "Dashboard")
+  group: string | null;  // Optional grouping (nullable)
+  parent: string | null; // Optional parent menu (nullable)
+  priority: number;   // Priority level (higher = more important)
+}
+
+// Model Config
+// ------------
+
+export interface ModelAttribute {
+  name: string;
+  type: string;
+  nullable: boolean;
+  default: any;
+}
+
+export interface ModelAssociation {
+  name: string;
+  type: string;
+  class_name: string;
+  foreign_key: string;
+  primary_key: string;
+  optional: boolean;
+  polymorphic?: string | null;
+}
+
+export interface ModelColumn {
+  name: string;
+  options: {
+      label: string;
+      type: string;
+      include?: string;  // Optional include field for references
+  };
+  block: Record<string, any>; // Block logic can be any object
+}
+
 export interface ModelListData {
     data: any[] | null; // Array of records or null if there's an error
     currentPage: number; // Current page number
@@ -37,28 +134,9 @@ export interface ModelListData {
     error: string | null; // Error message or null
 }
 
-export interface TimeSeriesDataResponse {
-    data: { date: string; created: number; updated: number }[];
-    createdThisMonth: number;
-    updatedThisMonth: number;
-    createdThisWeek: number;
-    updatedThisWeek: number;
-    createdLastMonth: number;
-    updatedLastMonth: number;
-    createdLastWeek: number;
-    updatedLastWeek: number;
-}
+// Visual Config
+// -------------
 
-// --------------
-// Visualisations
-// --------------
-export interface DisplayPosition {
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-  
 export interface Highlight {
   title: string;
   caption?: string;
@@ -87,16 +165,15 @@ export interface Collection {
   title: string;
   caption: string;
   api_end_point: string;
-  display: DisplayPosition;
-  refresh_interval?: number;
   metrics: Metric[];
 }
 
 export interface WidgetData {
   name: string;
+  page_type: string;
   title: string;
   description: string;
-  visualisations: { [key: string]: Collection };
+  widgets: Widget[] | [] | null;
 }
 
 export interface ChartConfig {
@@ -119,4 +196,48 @@ export interface ChartConfig {
   // Styling & Colors
   theme?: "light" | "dark"; // Chart theme
   colors?: string[]; // Custom colors for different data series
+}
+
+// --------------
+// Old
+// --------------
+
+export interface ModelMetaData {
+  model: string;  // This corresponds to the model name (e.g., "Student")
+  model_config: ModelConfig;  // Embedded model configuration
+  visual_config?: VisualConfig; // Optional visual configuration
+}
+
+// Defining the types for the Model Menu
+export interface ModelMenu {
+  priority?: number;
+  label: string;
+  parent?: string | null;
+}
+
+export interface TimeSeriesDataResponse {
+  data: { date: string; created: number; updated: number }[];
+  createdThisMonth: number;
+  updatedThisMonth: number;
+  createdThisWeek: number;
+  updatedThisWeek: number;
+  createdLastMonth: number;
+  updatedLastMonth: number;
+  createdLastWeek: number;
+  updatedLastWeek: number;
+}
+
+// Old structure
+export interface DashboardWidget {
+  name: string;
+  model: string | null;
+  collection: string | null;
+  position: WidgetPosition | null;
+}
+
+// Defines the structure of each dashboard section
+export interface DashboardConfig {
+  title: string;
+  description: string;
+  widgets: DashboardWidget[];
 }

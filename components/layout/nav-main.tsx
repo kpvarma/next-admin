@@ -21,29 +21,31 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
+// Context & Definition Imports
 import { useServer } from "@/context/server_context"; // Import serverContext
-import { ModelMetaData } from "@/utils/models/definitions"; // Import serverContext
+import { MetaData } from "@/utils/models/definitions";
 
 export function NavMain() {
-  const { activeServer, setActiveServer, servers, setServers } = useServer(); // Access server context
+  const { activeServer } = useServer(); // Access server context
 
   // Get the model_names from the active server
-  const modelMetaData = activeServer?.modelMetaData || [];
+  const metaData = activeServer?.metaData || [];
 
-  // Group models by their `menu.parent`
-  const groupedData = modelMetaData.reduce((acc, model) => {
+  const groupedData = metaData.models.reduce((acc, model) => {
     const parent = model.menu.parent || "Uncategorized"; // Default to "Uncategorized" if parent is missing
     if (!acc[parent]) {
       acc[parent] = [];
     }
     acc[parent].push(model);
     return acc;
-  }, {} as Record<string, ModelMetaData[]>);
+  }, {} as Record<string, MetaData[]>);
+
+  console.log(groupedData);
 
   return (
     <SidebarGroup>
       
-      <a href={`/${activeServer?.name}/dashboard`} className="mt-4">
+      <a href={`/${activeServer?.name}/home`} className="mt-4">
         <span>Dashboard</span>
       </a>
       

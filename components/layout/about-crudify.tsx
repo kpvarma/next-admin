@@ -33,16 +33,15 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-export function AboutCRUDify({
-  crudifyData,
-}: {
-  crudifyData: {
-    name: string;
-    author: string;
-    avatar: string;
-  };
-}) {
+export function AboutCRUDify() {
   const { isMobile } = useSidebar();
+
+  // Centralized data
+  const crudifyData = {
+    name: "CRUDify - Next Admin",
+    author: "Krishna Prasad Varma",
+    avatar: "/avatars/01.jpg",
+  }
 
   return (
     <SidebarMenu>
