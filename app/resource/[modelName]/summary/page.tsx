@@ -33,9 +33,7 @@ export default function SummaryPage() {
 
     const summaryPages = activeServer?.metaData?.summary_pages;
     const modelMetaData = activeServer?.metaData?.models.find((m) => m.name === modelName);
-    console.log("summaryPages: ", summaryPages);
-    console.log("modelMetaData: ", modelMetaData);
-
+    
     if(summaryPages && modelMetaData){
 
       if(!modelMetaData.summary_page){

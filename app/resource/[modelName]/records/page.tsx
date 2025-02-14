@@ -8,6 +8,7 @@ import GridLayout from "react-grid-layout";
 import MainLayout from "@/components/layout/main-layout";
 import Pagination from "@/components/general/crud-pagination";
 import CollectionWidget from "@/components/widgets/CollectionWidget";
+import CrudifyAlert from "@/components/general/alert";
 import CRUDTable from "@/components/general/crud-table";
 import CRUDTabs from "@/components/general/crud-tabs";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -17,23 +18,22 @@ import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
 // Context
-import { ModelMetaData, WidgetData } from "@/utils/models/definitions";
+import { ModelConfig } from "@/utils/models/definitions";
 import { useServer } from "@/context/server_context";
 
 // APIs
-import { fetchIndexMetadata } from "@/utils/apis/metadata";
 import { fetchAllRecords } from "@/utils/apis/cruds";
 
 export default function RecordList() {
   const { modelName: rawModelName } = useParams();
   const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
+  
+  const { activeServer } = useServer();
 
-  const { activeServer, setActiveServer, servers } = useServer();
-
-  const [widgetsData, setWidgetsData] = useState<WidgetData|{}>([]);
+  const [alert, setAlert] = useState<{type: "error" | "info" | "success" | null, heading: string; description: string}>({type: null, heading: '', description: ''});
 
   const [modelData, setModelData] = useState<any[]>([]);
-  const [modelConfig, setModelConfig] = useState<ModelMetaData | null>(null);
+  const [modelConfig, setModelConfig] = useState<ModelConfig | null>(null);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [perPage, setPerPage] = useState<number>(10);
   const [totalCount, setTotalCount] = useState<number>(0);
@@ -41,29 +41,6 @@ export default function RecordList() {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!activeServer) return;
-      if (!modelName) return;
-
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetchIndexMetadata(activeServer, modelName);
-        if (response.error) setError(response.error);
-        else {
-          setWidgetsData(response.data || []);
-        }
-      } catch (err: any) {
-        setError(err.message || "An unexpected error occurred.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [activeServer, modelName]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,7 +52,7 @@ export default function RecordList() {
         const response = await fetchAllRecords(activeServer, modelName, currentPage, perPage);
         if (response.error) setError(response.error);
         else {
-          setModelData(response.data || []);
+          if(response.data) setModelData(response.data);
           setCurrentPage(response.currentPage);
           setPerPage(response.perPage);
           setTotalCount(response.totalCount);
@@ -92,9 +69,9 @@ export default function RecordList() {
 
     // Set modelConfig
     if (activeServer?.metaData && activeServer.metaData.models && activeServer?.metaData.models.length > 0) {
-      const metaData = activeServer.metaData.models.find((mdata) => mdata.name === modelName);
-      if (metaData) {
-        setModelConfig(metaData);
+      const mConfig = activeServer.metaData.models.find((mdata) => mdata.name === modelName);
+      if (mConfig) {
+        setModelConfig(mConfig);
       }
     }
   }, [activeServer, modelName, currentPage, perPage]);
@@ -106,34 +83,7 @@ export default function RecordList() {
         {modelName && (
           <CRUDTabs modelName={modelName} recordId={null} />
         )}
-        
-        {loading && (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">Loading ...</h1>
-          </div>
-        )}
-
-        {error && (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">Error</h1>
-            <p className="text-red-500">{error}</p>
-          </div>
-        )}
       </div>
-
-      {widgetsData?.visualisations && Object.keys(widgetsData.visualisations).length > 0 && (
-        <div className="px-2">
-          <GridLayout className="layout bg-gray-200" cols={12} rowHeight={20} width={1200}>
-            {widgetsData && widgetsData.visualisations ? (
-              Object.entries(widgetsData.visualisations).map(([key, collection]) => (
-                <div key={key} data-grid={collection.display}>
-                  <CollectionWidget collection={collection} activeServer={activeServer} modelName={modelName} />
-                </div>
-              ))
-            ) : null}
-          </GridLayout>
-        </div>
-      )}
 
       <div className="px-2 py-2">
         <Card className="shadow-md">
@@ -147,6 +97,18 @@ export default function RecordList() {
 
           {/* Card Content */}
           <CardContent>
+
+            {/* Show Loading */}
+            {loading ? (
+              <div className="p-6">
+                <h1 className="text-2xl font-bold mb-4 text-center">Loading ...</h1>
+              </div>
+            ) : (
+              <>
+                {alert && alert.type && <CrudifyAlert alertData={alert} />} {/* Alert Box */}
+              </>
+            )}
+            
             {/* CRUD Table with Top Margin */}
             <div className="mt-6">
               <CRUDTable 
