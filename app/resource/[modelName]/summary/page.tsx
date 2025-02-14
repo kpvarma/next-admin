@@ -16,26 +16,17 @@ import CRUDTabs from "@/components/general/crud-tabs";
 
 // Context
 import { Widget } from "@/utils/models/definitions";
-import { useServer } from "../../../context/server_context";
-
-// APIs
-import { fetchSummaryMetadata } from "@/utils/apis/metadata";
+import { useServer } from "@/context/server_context";
 
 export default function SummaryPage() {
-  const { activeServer, setActiveServer, servers } = useServer();
+  const { activeServer } = useServer();
   const [summaryMetaData, setSummaryMetaData] = useState<Record<string, any> | null>(null);
 
-  const { serverName, modelName: rawModelName } = useParams();
+  const { modelName: rawModelName } = useParams();
   const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
   
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState<{type: "error" | "info" | "success" | null, heading: string; description: string}>({type: null, heading: '', description: ''});
-
-  useEffect(() => {
-    if(activeServer) return;
-    const matchedServer = servers.find((server) => server.name === serverName);
-    if (matchedServer) setActiveServer(matchedServer);
-  }, [serverName, servers, setActiveServer]);
 
   useEffect(() => {
     if (!activeServer || !modelName || summaryMetaData) return;
@@ -94,19 +85,19 @@ export default function SummaryPage() {
         )}
       </div>
     
-      <div className="p-2">
+      <div className="px-2">
         <GridLayout className="layout" cols={12} rowHeight={20} width={1200}>
-          {
-            summaryMetaData?.widgets?.map((widget: Widget, index: number) => (
-              <div key={index} data-grid={widget.position}>
-                <CollectionWidget 
-                  collection={widget.collection}
-                  activeServer={activeServer} 
-                  modelName={widget.model} 
-                />
-              </div>
-            ))
-          }
+            {
+              summaryMetaData?.widgets?.map((widget: Widget, index: number) => (
+                <div key={index} data-grid={widget.position}>
+                  <CollectionWidget 
+                    collection={widget.collection}
+                    activeServer={activeServer} 
+                    modelName={widget.model} 
+                  />
+                </div>
+              ))
+            }
         </GridLayout>
       </div>
       

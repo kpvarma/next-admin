@@ -14,54 +14,41 @@ import CollectionWidget from "@/components/widgets/CollectionWidget";
 import CrudifyAlert from "@/components/general/alert";
 
 // Context
-import { Widget } from "@/utils/models/definitions";
+import { WidgetData } from "@/utils/models/definitions";
 import { useServer } from "@/context/server_context";
 
-export default function DashboardPage() {
+export default function HomePage() {
   const { activeServer, setActiveServer, servers } = useServer();
-  const [dashboardMetaData, setDashboardMetaData] = useState<Record<string, any> | null>(null);
-  
-  const { serverName, id: rawDashboardName } = useParams();
-  const dashboardName = Array.isArray(rawDashboardName) ? rawDashboardName[0] : rawDashboardName;
 
   const [loading, setLoading] = useState(true);
   const [alert, setAlert] = useState<{type: "error" | "info" | "success" | null, heading: string; description: string}>({type: null, heading: '', description: ''});
+
+  const [widgetsData, setWidgetsData] = useState<Record<string, any> | null>(null);
   
   useEffect(() => {
-    if(activeServer) return;
-    const matchedServer = servers.find((server) => server.name === serverName);
-    if (matchedServer) setActiveServer(matchedServer);
-  }, [serverName]);
-
-  useEffect(() => {
-    if (!activeServer || !dashboardName || dashboardMetaData) return;
-
-    const dashboards = activeServer?.metaData?.dashboards;
-    if(dashboards){
-      const dMetaData = dashboards[dashboardName];
-      console.log(dMetaData);
-      if (dMetaData) {
-        setDashboardMetaData(dMetaData);
-      } else {
-        setLoading(false);
-        setAlert({type: "error", heading: "Error!", description: `Dashboard '${dashboardName}' not found. Please review the configuration` });
-      }
-    }
-  }, [dashboardName, activeServer]);
-
-  // Ensure loading is updated after `dashboardMetaData` is set
-  useEffect(() => {
-    if (dashboardMetaData) {
+    if(!activeServer) return;
+    const homeWidgets = activeServer?.metaData?.dashboards?.home;
+    if (homeWidgets) {
+      setWidgetsData(homeWidgets);
+    } else {
       setLoading(false);
-      if(dashboardMetaData.widgets.length === 0) {
-        setAlert({type: "error", heading: "Error!", description: `No Widgets configured for the dashboard '${dashboardName}'. Please review the configuration` });
+      setAlert({type: "error", heading: "Error!", description: `The default dashboard for home either overridden or not initialized properly. Please review the configuration` });
+    }
+  }, [activeServer]);
+
+  // Ensure loading is updated after `widgetsData` is set
+  useEffect(() => {
+    if (widgetsData) {
+      setLoading(false);
+      if(widgetsData.widgets.length === 0) {
+        setAlert({type: "error", heading: "Error!", description: `No Widgets configured for the home dashboard. Please review the configuration` });
       }
     }
-  }, [dashboardMetaData]);
+  }, [widgetsData]);
 
   return (
     <MainLayout>
-
+      
       {/* Show Loading */}
       {loading ? (
         <div className="p-6">
@@ -72,11 +59,11 @@ export default function DashboardPage() {
           {alert && alert.type && <CrudifyAlert alertData={alert} />} {/* Alert Box */}
         </>
       )}
-
+      
       <div className="p-2">
         <GridLayout className="layout" cols={12} rowHeight={20} width={1200}>
           {
-            dashboardMetaData?.widgets?.map((widget: Widget, index: number) => (
+            widgetsData?.widgets?.map((widget, index) => (
               <div key={index} data-grid={widget.position}>
                 <CollectionWidget 
                   collection={widget.collection}

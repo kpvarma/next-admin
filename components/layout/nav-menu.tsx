@@ -55,23 +55,22 @@ export function NavMenu() {
 
   // **Function to determine Icon & URL based on type**
   const getMenuItemData = (item: NavMenuType) => {
-    const serverName = activeServer?.name || "default"; // Fallback in case server name is missing
     const modelMetaData = activeServer?.metaData?.models.find((m) => m.name === item.name);
 
     switch (item.type) {
       case "home":
-        return { icon: <House className="h-4 w-4" />, url: `/${serverName}/home` };
+        return { icon: <House className="h-4 w-4" />, url: `/home` };
       case "dashboard":
-        return { icon: <LayoutDashboard className="h-4 w-4" />, url: `/${serverName}/dashboard/${item.name}` };
+        return { icon: <LayoutDashboard className="h-4 w-4" />, url: `/dashboard/${item.name}` };
       case "report":
-        return { icon: <TableProperties className="h-4 w-4" />, url: `/${serverName}/reports/${item.name}` };
+        return { icon: <TableProperties className="h-4 w-4" />, url: `/reports/${item.name}` };
       case "page":
-        return { icon: <LayoutDashboard className="h-4 w-4" />, url: `/${serverName}/page/${item.name}` };
+        return { icon: <LayoutDashboard className="h-4 w-4" />, url: `/page/${item.name}` };
       case "resource":
         if(modelMetaData && modelMetaData.summary_page){
-          return { icon: <Logs className="h-4 w-4" />, url: `/${serverName}/${item.name}` };
+          return { icon: <Logs className="h-4 w-4" />, url: `/resource/${item.name}/summary` };
         } else {
-          return { icon: <Logs className="h-4 w-4" />, url: `/${serverName}/${item.name}/list` };
+          return { icon: <Logs className="h-4 w-4" />, url: `/resource/${item.name}/records` };
         }
         
       default:
@@ -92,7 +91,7 @@ export function NavMenu() {
               const isActive = pathname === url;
 
               return (
-                <SidebarMenuItem key={`item-${item.name}`} className={isActive ? "bg-gray-200 text-gray-900 rounded-md" : ""}>
+                <SidebarMenuItem key={`subitem-${group}-${item.name}`} className={isActive ? "bg-gray-200 text-gray-900 rounded-md" : ""}>
                   <SidebarMenuButton asChild>
                     <a href={url} rel="noopener noreferrer" className="flex items-center gap-2 p-2">
                       {icon}
@@ -118,7 +117,7 @@ export function NavMenu() {
                       {items.map((item) => {
                         const { icon, url } = getMenuItemData(item);
                         return (
-                          <SidebarMenuSubItem key={`subitem-${item.name}`}>
+                          <SidebarMenuSubItem key={`subitem-${group}-${parent}-${item.name}`}>
                             <SidebarMenuSubButton asChild>
                               <a href={url} rel="noopener noreferrer">
                                 {icon}

@@ -10,6 +10,7 @@ import Pagination from "@/components/general/crud-pagination";
 import CollectionWidget from "@/components/widgets/CollectionWidget";
 import CRUDTable from "@/components/general/crud-table";
 import CRUDTabs from "@/components/general/crud-tabs";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
 // Styles Imports
 import "react-grid-layout/css/styles.css";
@@ -17,14 +18,14 @@ import "react-resizable/css/styles.css";
 
 // Context
 import { ModelMetaData, WidgetData } from "@/utils/models/definitions";
-import { useServer } from "../../../../context/server_context";
+import { useServer } from "@/context/server_context";
 
 // APIs
 import { fetchIndexMetadata } from "@/utils/apis/metadata";
-import { fetchAllRecords } from "../../../../utils/apis/cruds";
+import { fetchAllRecords } from "@/utils/apis/cruds";
 
-export default function ListRecords() {
-  const { serverName, modelName: rawModelName } = useParams();
+export default function RecordList() {
+  const { modelName: rawModelName } = useParams();
   const modelName = Array.isArray(rawModelName) ? rawModelName[0] : rawModelName;
 
   const { activeServer, setActiveServer, servers } = useServer();
@@ -40,11 +41,6 @@ export default function ListRecords() {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const matchedServer = servers.find((server) => server.name === serverName);
-    if (matchedServer) setActiveServer(matchedServer);
-  }, [serverName, servers, setActiveServer]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -138,18 +134,33 @@ export default function ListRecords() {
           </GridLayout>
         </div>
       )}
-      
-      <div className="px-2">
-        <div className="grid py-2 px-3 bg-gray-200">
-          <div className="px-2 bg-white">
-            <div className="p-4">
-              <h1 className="text-2xl font-bold">{modelConfig?.title}</h1>
-              <p className="text-red-5001">{modelConfig?.description}</p>
 
-              {/* Display CRUD Table */}
-              <CRUDTable metadata={modelConfig} data={modelData} currentPage={currentPage} perPage={perPage} totalCount={totalCount} loading={loading}/>
+      <div className="px-2 py-2">
+        <Card className="shadow-md">
+          {/* Card Header: Title & Description */}
+          <CardHeader>
+            <CardTitle>{modelConfig?.title}</CardTitle>
+            {modelConfig?.description && (
+              <CardDescription>{modelConfig?.description}</CardDescription>
+            )}
+          </CardHeader>
 
-              {/* Displaay CRUD Pagination Controls */}
+          {/* Card Content */}
+          <CardContent>
+            {/* CRUD Table with Top Margin */}
+            <div className="mt-6">
+              <CRUDTable 
+                metadata={modelConfig} 
+                data={modelData} 
+                currentPage={currentPage} 
+                perPage={perPage} 
+                totalCount={totalCount} 
+                loading={loading} 
+              />
+            </div>
+
+            {/* Pagination with Top Margin */}
+            <div className="mt-4">
               <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}
@@ -161,9 +172,10 @@ export default function ListRecords() {
                 }}
               />
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
+      
     </MainLayout>
   );
 }

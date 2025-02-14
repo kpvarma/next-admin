@@ -127,9 +127,8 @@ export default function NewServerPage() {
         setErrors({});
         setStep3Complete(true);
     
-        // Navigate to /configure after success
-        // router.push("/configure");
-        router.push(`/${apiName}/home`) // Navigate to the new route
+        // Navigate to homepage after success
+        router.push(`/home`)
       } catch (fetchError) {
         setErrors({ apiKey: "Failed to fetch and save server details. Please try again." });
         console.error("Error!", fetchError);
@@ -138,7 +137,7 @@ export default function NewServerPage() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 min-h-screen bg-background">
+    <div className="grid lg:grid-cols-2 min-h-screen bg-white">
       {/* Form Section */}
       <div className="flex flex-col justify-center p-8">
         <h1 className="text-2xl font-bold mb-4">Add Server</h1>

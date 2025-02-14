@@ -11,12 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toTitleCase } from "@/utils/stringUtils";
 
 interface CRUDTableProps {
   data: Record<string, any>[]; // Array of objects representing table rows
-  metadata: Record<string, any>|null; // Hash of objects representing table rows
+  metadata: Record<string, any>; // Hash of objects representing table rows
   currentPage: number;
   perPage: number;
   totalCount: number;
@@ -33,33 +33,37 @@ const CRUDTable: React.FC<CRUDTableProps> = ({ metadata, data, currentPage, perP
   }
 
   return (
-    <Table className="mt-2">
-      <TableCaption>
-        Showing {currentPage}-{perPage} of {totalCount}.
-      </TableCaption>
-      <TableHeader>
-        <TableRow>
-          {data.length > 0 && Object.keys(data[0]).map((key) => {
-            const columnConfig = metadata.columns.find((col: any) => col.name === key) || null;
+    <ScrollArea className="w-full border rounded-md p-2">
+      <div className="w-full min-w-max">
+        <Table className="mt-2">
+          <TableCaption>
+            Showing {currentPage}-{perPage} of {totalCount}.
+          </TableCaption>
+          <TableHeader>
+            <TableRow>
+              {data.length > 0 && Object.keys(data[0]).map((key) => {
+                const columnConfig = metadata.columns.find((col: any) => col.name === key) || null;
 
-            return (
-              <TableHead key={key}>
-                {toTitleCase(columnConfig ? columnConfig.options.label : key)}
-              </TableHead>
-            );
-          })}
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {data.map((item, index) => (
-          <TableRow key={index}>
-            {Object.keys(item).map((key) => (
-              <TableCell key={key}>{item[key]}</TableCell>
+                return (
+                  <TableHead key={key}>
+                    {toTitleCase(columnConfig ? columnConfig.options.label : key)}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item, index) => (
+              <TableRow key={index}>
+                {Object.keys(item).map((key) => (
+                  <TableCell key={key}>{item[key]}</TableCell>
+                ))}
+              </TableRow>
             ))}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+          </TableBody>
+        </Table>
+      </div>
+    </ScrollArea>
   );
 };
 

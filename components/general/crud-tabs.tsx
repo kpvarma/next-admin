@@ -19,11 +19,13 @@ export default function CRUDTabs({ modelName, recordId = null }: CRUDTabsProps) 
 
   useEffect(() => {
     if (activeServer) {
-      const tabs = [
-        { name: "Summary", href: `/${activeServer.name}/${modelName}` },
-        { name: "List", href: `/${activeServer.name}/${modelName}/list` },
-        { name: "New", href: `/${activeServer.name}/${modelName}/new` },
-      ];
+      const modelMetaData = activeServer?.metaData?.models.find((m) => m.name === modelName);
+      const tabs = [];
+      if(modelMetaData && modelMetaData.summary_page){
+        tabs.push({ name: "Summary", href: `/resource/${modelName}/summary` })
+      }
+      tabs.push({ name: "Records", href: `/resource/${modelName}/records` })
+      tabs.push({ name: "New", href: `/resource/${modelName}/new` })
       // Add Edit page if recordId is provided
       // if (recordId) {
       //   tabs.push({ name: "Edit", href: `/${activeServer.name}//${modelName}/${recordId}` });
@@ -33,18 +35,17 @@ export default function CRUDTabs({ modelName, recordId = null }: CRUDTabsProps) 
   }, [activeServer, pathname]);
 
   return (
-    <div className="bg-white flex space-x-1">
+    <div className="px-3 bg-grey-200 flex space-x-1">
       {tabsData.map((tab) => {
         const isActive = pathname === tab.href;
         return (
           <Link
             key={tab.name}
             href={tab.href}
-            className={`px-4 py-2 text-sm font-medium transition-all duration-200 
-              border border-b-2 ${
+            className={`px-4 py-2 text-sm font-medium transition-all duration-200 border border-t border-l border-r border-b rounded-md ${
                 isActive
-                  ? "border-b-transparent border-t border-l border-r rounded-t-md bg-gray-200 text-gray-900 font-semibold"
-                  : "border-transparent text-gray-600 hover:border-gray-200 rounded-t-md hover:text-gray-800"
+                  ? "font-semibold text-gray-900 bg-white  "
+                  : "text-gray-600 hover:border-gray-400 rounded-md hover:text-gray-800"
               }`}
           >
             {tab.name}

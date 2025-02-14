@@ -15,7 +15,6 @@ import CrudifyAlert from "@/components/general/alert";
 import InfoTable from "@/components/general/info-table";
 import JsonViewer from "@/components/general/json-viewer";
 
-
 // Utils Import
 import { saveToIndexedDB, fetchAllFromIndexedDB, deleteByApiName } from "@/utils/indexdb";
 import { fetchMetaData } from "@/utils/apis/metadata";
@@ -53,8 +52,11 @@ export default function ListServers() {
   };
 
   const handleLaunch = (server: any) => {
-    // console.log("Launch server:", server);
-    router.push(`/${server.name}/home`); // Navigate to the home page
+    // set the server as active server
+    setActiveServer(server);
+
+    // Navigate to the home page
+    router.push(`/home`); 
   };
   
   const handleRefresh = async (server: any) => {
@@ -92,9 +94,12 @@ export default function ListServers() {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 min-h-screen bg-background">
+    <div className="grid lg:grid-cols-2 min-h-screen bg-white">
       {/* Left Section */}
       <div className="flex flex-col justify-center p-8">
+        
+        {/* Title */}
+        <h1 className="text-4xl font-bold text-center my-8">Configure Servers</h1>
 
         {/* Show Loading */}
         {loading ? (
@@ -116,9 +121,6 @@ export default function ListServers() {
             )}
           </>
         )}
-        
-        {/* Title */}
-        <h1 className="text-4xl font-bold text-center my-8">Configure Servers</h1>
 
         {/* Add Server Button */}
         <div className="flex justify-center mb-8">
